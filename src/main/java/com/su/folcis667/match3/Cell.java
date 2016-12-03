@@ -25,6 +25,7 @@
  */
 package com.su.folcis667.match3;
 
+import javafx.scene.paint.Color;
 import net.sf.tweety.logics.commons.syntax.Variable;
 
 public class Cell extends Variable {
@@ -47,11 +48,10 @@ public class Cell extends Variable {
 
     public String c() {
         return this.value.split(DELIMITER)[0];
-        //Color.web("orange", 0.5);
     }
-    
-    public String c_str(){
-        return this.value.split(DELIMITER)[0];
+
+    public Color color() {
+        return Color.web(this.c());
     }
 
     public int x() {
