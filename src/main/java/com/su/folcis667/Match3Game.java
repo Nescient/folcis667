@@ -29,34 +29,55 @@ import com.su.folcis667.match3.Cell;
 import java.util.Vector;
 
 public class Match3Game {
-    private Cell[][] mCells;
-    private javafx.scene.paint.Color[] mColors;
 
-    final String DELIMITER = ",";
+    private final Cell[][] mCells;
+    private final String[] mColors;
 
     public Match3Game(int cols, int rows, int colors) {
         mCells = new Cell[cols][rows];
+        mColors = GenerateColors(colors);
+        InitializeCells();
     }
 
-    /**
-     * This parses strings of the form [color, x, y].
-     * @param value The value of this variable.
-     */
-//    @Override
-//    public void set(String value) {
-//        super.set(value.replaceAll("[^a-zA-Z0-9,]", "").toUpperCase());
-//    }
-//
-//    public String c() {
-//        return this.value.split(DELIMITER)[0];
-//    }
-//
-//    public int x() {
-//        return Integer.parseInt(this.value.split(DELIMITER)[1]);
-//    }
-//
-//    public int y() {
-//        return Integer.parseInt(this.value.split(DELIMITER)[2]);
-//    }
+    private void InitializeCells() {
+        for (int i = 0; i < mCells.length; ++i) {
+            for (int j = 0; j < mCells[i].length; ++j) {
+                mCells[i][j] = new Cell("Cell_"+Integer.toString(i) + "_" + Integer.toString(j));
+                String value = mColors[(i + j) % mColors.length];
+                value += "," + Integer.toString(i) + "," + Integer.toString(j);
+                mCells[i][j].set(value);
+                System.out.println(mCells[i][j].c());
+                System.out.println(mCells[i][j].color());
+            }
+        }
+    }
+
+    private static String[] GenerateColors(int numColors) {
+        switch (numColors) {
+            case 0:
+                return new String[]{};
+            case 1:
+                return new String[]{"red"};
+            case 2:
+                return new String[]{"red", "blue"};
+            case 3:
+                return new String[]{"red", "blue", "green"};
+            case 4:
+                return new String[]{"red", "blue", "green", "orange"};
+            case 5:
+                return new String[]{"red", "blue", "green", "orange", "purple"};
+            case 6:
+                return new String[]{"red", "blue", "green", "orange", "purple", "yellow"};
+            case 7:
+                return new String[]{"red", "blue", "green", "orange", "purple", "yellow", "white"};
+            case 8:
+                return new String[]{"red", "blue", "green", "orange", "purple", "yellow", "white", "cyan"};
+            case 9:
+                return new String[]{"red", "blue", "green", "orange", "purple", "yellow", "white", "cyan", "pink"};
+            case 10:
+                return new String[]{"red", "blue", "green", "orange", "purple", "yellow", "white", "cyan", "pink", "yellowgreen"};
+        }
+        return null;
+    }
 
 }
