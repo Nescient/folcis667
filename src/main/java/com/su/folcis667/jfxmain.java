@@ -58,10 +58,10 @@ public class jfxmain extends Application {
             }
         });
 
-        FXMLLoader fxml_loader = new FXMLLoader();
+        FXMLLoader fxml_loader = new FXMLLoader(getClass().getResource("/match3fx/StateView.fxml"));
         GridPane state_view = null;
         try {
-            state_view = (GridPane) fxml_loader.load(getClass().getResource("/match3fx/StateView.fxml"));
+            state_view = (GridPane) fxml_loader.load();
 //       Scene myScene = new Scene(myPane);
 //       primaryStage.setScene(myScene);
 //       primaryStage.show();
@@ -76,7 +76,7 @@ public class jfxmain extends Application {
         StackPane root = new StackPane();
         root.getChildren().add(btn);
 
-        Scene scene = new Scene(state_view, 300, 250);
+        Scene scene = new Scene(state_view, 800, 650);
 
         primaryStage.setTitle("Match 3 Puzzle Solver");
         primaryStage.setScene(scene);
