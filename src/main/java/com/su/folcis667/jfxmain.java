@@ -25,11 +25,17 @@
  */
 package com.su.folcis667;
 
+import com.su.folcis667.match3fx.StateViewController;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
@@ -38,27 +44,46 @@ import javafx.stage.Stage;
  * @author me
  */
 public class jfxmain extends Application {
-    
+
     @Override
     public void start(Stage primaryStage) {
+//        content.getChildren().setAll();
         Button btn = new Button();
         btn.setText("Say 'Hello World'");
         btn.setOnAction(new EventHandler<ActionEvent>() {
-            
+
             @Override
             public void handle(ActionEvent event) {
                 System.out.println("Hello World!");
             }
         });
-        
+
+        FXMLLoader fxml_loader = new FXMLLoader();
+        GridPane state_view = null;
+        try {
+            state_view = (GridPane) fxml_loader.load(getClass().getResource("/match3fx/StateView.fxml"));
+//       Scene myScene = new Scene(myPane);
+//       primaryStage.setScene(myScene);
+//       primaryStage.show();
+        } catch (IOException ex) {
+            Logger.getLogger(jfxmain.class.getName()).log(Level.SEVERE, null, ex);
+            return;
+        }
+        StateViewController state_view_controller = (StateViewController) fxml_loader.getController();
+
+//        GridPane state_view = new GridPane();
+//        state_view.getChildren().setAll(FXMLLoader.load("StateView.fxml"));
         StackPane root = new StackPane();
         root.getChildren().add(btn);
-        
-        Scene scene = new Scene(root, 300, 250);
-        
-        primaryStage.setTitle("Hello World!");
+
+        Scene scene = new Scene(state_view, 300, 250);
+
+        primaryStage.setTitle("Match 3 Puzzle Solver");
         primaryStage.setScene(scene);
         primaryStage.show();
+        
+        Match3Game asdf = new Match3Game(20, 20, 10);
+        state_view_controller.refresh(asdf.mCells);
     }
 
     /**
@@ -67,5 +92,5 @@ public class jfxmain extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-    
+
 }
