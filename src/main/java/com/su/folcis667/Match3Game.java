@@ -26,11 +26,10 @@
 package com.su.folcis667;
 
 import com.su.folcis667.match3.Cell;
-import java.util.Vector;
 
 public class Match3Game {
 
-    private final Cell[][] mCells;
+    public final Cell[][] mCells;
     private final String[] mColors;
 
     public Match3Game(int cols, int rows, int colors) {
