@@ -33,7 +33,7 @@ public class Aligned extends Predicate {
         super("Aligned", 3 /*arity*/);
     }
 
-    static boolean test(Cell A, Cell B, Cell C) {
+    public static boolean test(Cell A, Cell B, Cell C) {
         return (NeighborX.test(A, B) && NeighborX.test(B, C))
                 || (NeighborY.test(A, B) && NeighborY.test(B, C));
     }

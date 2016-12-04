@@ -33,7 +33,7 @@ public class Matched extends Predicate {
         super("Matched", 3 /*arity*/);
     }
 
-    static boolean test(Cell A, Cell B, Cell C) {
+    public static boolean test(Cell A, Cell B, Cell C) {
         return Aligned.test(A, B, C)
                 && A.color() == B.color()
                 && B.color() == C.color();
