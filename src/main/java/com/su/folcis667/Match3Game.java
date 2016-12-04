@@ -80,13 +80,12 @@ public class Match3Game {
     }
 
     private boolean IsRealCell(int row, int col) {
-        return row < mCells.length && col < mCells[row].length;
+        return row >= 0 && row < mCells.length
+                && col >= 0 && col < mCells[row].length;
     }
 
     private boolean IsValidSwap(int row1, int col1, int row2, int col2) {
-        boolean real_cells = (row1 < mCells.length) && (col1 < mCells[row1].length)
-                && (row2 < mCells.length) && (col2 < mCells[row2].length);
-        return real_cells
+        return IsRealCell(row1, col1) && IsRealCell(row2, col2)
                 && (NeighborX.test(mCells[row1][col1], mCells[row2][col2])
                 || NeighborY.test(mCells[row1][col1], mCells[row2][col2]));
     }
@@ -126,10 +125,6 @@ public class Match3Game {
                     mCells[test.y() + 2][test.x()]);
         }
         return matched;
-    }
-
-    private boolean MatchingCells(Cell A, Cell B, Cell C) {
-        return Matched.test(A, B, C);
     }
 
     private void InitializeCells() {
