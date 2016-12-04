@@ -63,7 +63,10 @@ public class Match3Game {
         for (int i = 0; i < mCells.length; ++i) {
             for (int j = 0; j < mCells[i].length; ++j) {
                 if (SwapCreatesMatch(i, j, i, j + 1)) {
-                    rval.add(new MatchingPair(mCells[i][j], mCells[i][j]));
+                    rval.add(new MatchingPair(mCells[i][j], mCells[i][j + 1]));
+                }
+                if (SwapCreatesMatch(i, j, i + 1, j)) {
+                    rval.add(new MatchingPair(mCells[i][j], mCells[i + 1][j]));
                 }
             }
         }
@@ -71,12 +74,21 @@ public class Match3Game {
     }
 
     private boolean SwapCreatesMatch(int row1, int col1, int row2, int col2) {
+        boolean rval = false;
         if (IsValidSwap(row1, col1, row2, col2)) {
-            Cell right = new Cell(mCells[row1][col1]);  // do the swap
-            Cell left = new Cell(mCells[row2][col2]);  // do the swap
-            return HasMatchingNeighbor(right) || HasMatchingNeighbor(left);
+            Cell old_left = new Cell(mCells[row1][col1]);
+            Cell old_right = new Cell(mCells[row2][col2]);
+            Cell left = new Cell(mCells[row1][col1]);
+            left.x(mCells[row2][col2].x());
+            left.y(mCells[row2][col2].y());
+            Cell right = new Cell(mCells[row2][col2]);
+            right.x(mCells[row1][col1].x());
+            right.y(mCells[row1][col1].y());
+            // Cell right = new Cell(mCells[row1][col1]);  // do the swap
+            // Cell left = new Cell(mCells[row2][col2]);  // do the swap
+            rval = HasMatchingNeighbor(right) || HasMatchingNeighbor(left);
         }
-        return false;
+        return rval;
     }
 
     private boolean IsRealCell(int row, int col) {
@@ -130,9 +142,10 @@ public class Match3Game {
     private void InitializeCells() {
         for (int i = 0; i < mCells.length; ++i) {
             for (int j = 0; j < mCells[i].length; ++j) {
-                mCells[i][j] = new Cell("Cell_" + Integer.toString(i) + "_" + Integer.toString(j));
-                String value = mColors[(i + j) % mColors.length];
-                value += "," + Integer.toString(i) + "," + Integer.toString(j);
+                mCells[i][j] = new Cell("Cell_" + Integer.toString(j) + "_" + Integer.toString(i));
+                int index = (i == mCells.length - 1) ? (i + j + 1) % mColors.length : (i + j) % mColors.length;
+                String value = mColors[index];
+                value += "," + Integer.toString(j) + "," + Integer.toString(i);
                 mCells[i][j].set(value);
             }
         }

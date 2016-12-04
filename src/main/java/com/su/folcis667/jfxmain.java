@@ -79,10 +79,10 @@ public class jfxmain extends Application {
         
         ArrayList<Match3Game.MatchingPair> pairs = asdf.GetMatchableCells();
         for(Match3Game.MatchingPair pair : pairs){
-            String match = "";
-            match += pair.mLeft.c() + " match: ";
-            match += "(" + pair.mLeft.x() + ", " + pair.mLeft.y() + ")";
-            match += " and (" + pair.mRight.x() + ", " + pair.mRight.y() + ")";
+            String match = "match: " + pair.mLeft.get() + " and " +pair.mRight.get();
+//            match += pair.mLeft.c() + " match: ";
+//            match += "(" + pair.mLeft.x() + ", " + pair.mLeft.y() + ")";
+//            match += " and (" + pair.mRight.x() + ", " + pair.mRight.y() + ")";
             items.add(match);
         }
         if (pairs.isEmpty()){

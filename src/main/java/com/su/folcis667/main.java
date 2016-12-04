@@ -50,11 +50,12 @@ public class main {
         System.out.println(test.color());
         Match3Game asdf = new Match3Game(20, 20, 10);
         try {
-            Formula one = fp.parseFormula("NeighborX(A,B) <=> A.y = B.y ^ ((A.x = B.x + 1) V (A.x = B.x-1))");
+            Formula i = new FolParser().parseFormula("forall X: forall Y: A(X,Y)");
+            Formula one = fp.parseFormula("NeighborX(A,B) <=> A.y == B.y && ((A.x == B.x + 1) || (A.x == B.x-1))");
         } catch (Exception ex) {
             System.out.println(ex);
         }
-        Set<FolFormula> formulas = new HashSet<>() ;
+        Set<FolFormula> formulas = new HashSet<>();
         //FolFormula x = new FolFormula
 //                QuantifiedFormula y = new QuantifiedFormula
 //        FolBeliefSet m3_believe = new FolBeliefSet();
