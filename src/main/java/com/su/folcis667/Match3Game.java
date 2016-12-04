@@ -48,13 +48,35 @@ public class Match3Game {
     private final String[] mColors;
 
     public Match3Game(int cols, int rows, int colors) {
-        mCells = new Cell[cols][rows];
+        mCells = new Cell[rows][cols];
         mColors = GenerateColors(colors);
         InitializeCells();
     }
 
-    public ArrayList<Cell[][]> GetNextState() {
-        ArrayList<Cell[][]> rval = new ArrayList<>();
+    public Match3Game(Cell[][] cells) {
+        mCells = cells;
+        mColors = GenerateColors(0);
+//        mCells = new Cell[cells.length][cells[0].length];  // java is the worst
+//        for (int i = 0; i < mCells.length; ++i) {
+//            for (int j = 0; j < mCells[i].length; ++i) {
+//                mCells[i][j] = new Cell(cells[i][j]);
+//            }
+//        }
+    }
+
+    public Cell[][] GetNextState(MatchingPair change) {
+        Cell[][] rval = new Cell[mCells.length][mCells[0].length];  // java is the worst
+        for (int i = 0; i < mCells.length; ++i) {
+            for (int j = 0; j < mCells[i].length; ++j) {
+                if (mCells[i][j] == change.mLeft) {
+                    rval[i][j] = new Cell(change.mRight);
+                } else if (mCells[i][j] == change.mRight) {
+                    rval[i][j] = new Cell(change.mLeft);
+                } else {
+                    rval[i][j] = new Cell(mCells[i][j]);
+                }
+            }
+        }
         return rval;
     }
 
@@ -78,15 +100,15 @@ public class Match3Game {
         if (IsValidSwap(row1, col1, row2, col2)) {
             Cell old_left = new Cell(mCells[row1][col1]);
             Cell old_right = new Cell(mCells[row2][col2]);
-            Cell left = new Cell(mCells[row1][col1]);
-            left.x(mCells[row2][col2].x());
-            left.y(mCells[row2][col2].y());
-            Cell right = new Cell(mCells[row2][col2]);
-            right.x(mCells[row1][col1].x());
-            right.y(mCells[row1][col1].y());
-            // Cell right = new Cell(mCells[row1][col1]);  // do the swap
-            // Cell left = new Cell(mCells[row2][col2]);  // do the swap
-            rval = HasMatchingNeighbor(right) || HasMatchingNeighbor(left);
+            mCells[row1][col1].x(old_right.x());
+            mCells[row1][col1].y(old_right.y());
+            mCells[row2][col2].x(old_left.x());
+            mCells[row2][col2].y(old_left.y());
+            rval = HasMatchingNeighbor(mCells[row1][col1]) || HasMatchingNeighbor(mCells[row2][col2]);
+            mCells[row1][col1].x(old_left.x());
+            mCells[row1][col1].y(old_left.y());
+            mCells[row2][col2].x(old_right.x());
+            mCells[row2][col2].y(old_right.y());
         }
         return rval;
     }

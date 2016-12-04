@@ -64,4 +64,17 @@ public class StateViewController implements Initializable {
             }
         }
     }
+    
+    public static void refresh(Cell[][] cells, GridPane view) {
+        view.getChildren().clear();
+        int size = 250 / cells.length;
+        for (int i = 0; i < cells.length; ++i) {
+            for (int j = 0; j < cells[i].length; ++j) {
+                Cell c = cells[i][j];
+                Rectangle c_rec = new Rectangle(size, size);
+                c_rec.setFill(c.color());
+                view.add(c_rec, c.x(), c.y());
+            }
+        }
+    }
 }

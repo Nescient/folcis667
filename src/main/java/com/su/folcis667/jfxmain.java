@@ -25,12 +25,15 @@
  */
 package com.su.folcis667;
 
+import com.su.folcis667.match3.Cell;
 import com.su.folcis667.match3fx.StateViewController;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -61,11 +64,11 @@ public class jfxmain extends Application {
             return;
         }
         StateViewController state_view_controller = (StateViewController) fxml_loader.getController();
-        
+
         ListView<String> swaps = new ListView<>();
-        ObservableList<String> items =FXCollections.observableArrayList();
+        ObservableList<String> items = FXCollections.observableArrayList();
         swaps.setItems(items);
-        
+
         GridPane main_view = new GridPane();
         main_view.add(state_view, 0, 0);
         main_view.add(swaps, 0, 1);
@@ -76,18 +79,69 @@ public class jfxmain extends Application {
 
         Match3Game asdf = new Match3Game(5, 5, 3);
         state_view_controller.refresh(asdf.mCells);
-        
+
         ArrayList<Match3Game.MatchingPair> pairs = asdf.GetMatchableCells();
-        for(Match3Game.MatchingPair pair : pairs){
-            String match = "match: " + pair.mLeft.get() + " and " +pair.mRight.get();
+        int count = 0;
+        for (Match3Game.MatchingPair pair : pairs) {
+            String match = count++ + " match: " + pair.mLeft.get() + " and " + pair.mRight.get();
 //            match += pair.mLeft.c() + " match: ";
 //            match += "(" + pair.mLeft.x() + ", " + pair.mLeft.y() + ")";
 //            match += " and (" + pair.mRight.x() + ", " + pair.mRight.y() + ")";
             items.add(match);
         }
-        if (pairs.isEmpty()){
+        if (pairs.isEmpty()) {
             items.add("NO MATCHES POSSIBLE FOR THIS STATE!");
         }
+
+        swaps.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                // Your action here
+                System.out.println("Selected item: " + newValue);
+                try {
+                    int index = Integer.parseInt(newValue.split(" ")[0]);
+                    Match3Game.MatchingPair pair = pairs.get(index);
+                    Cell[][] cells = asdf.GetNextState(pair);
+                    NewStateView(1, 0, cells, main_view);
+                } catch (NumberFormatException ex) {
+                    // do nothing.
+                }
+            }
+        });
+    }
+
+    ListView<String> NewStateView(int row, int col, Cell[][] cells, GridPane mainView) {
+        FXMLLoader fxml_loader = new FXMLLoader(getClass().getResource("/match3fx/StateView.fxml"));
+        GridPane state_view = null;
+        try {
+            state_view = (GridPane) fxml_loader.load();
+        } catch (IOException ex) {
+            Logger.getLogger(jfxmain.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
+        StateViewController state_view_controller = (StateViewController) fxml_loader.getController();
+        state_view_controller.refresh(cells);
+
+        ListView<String> swaps = new ListView<>();
+        ObservableList<String> items = FXCollections.observableArrayList();
+        swaps.setItems(items);
+
+        mainView.add(state_view, row, col);
+        mainView.add(swaps, row, col + 1);
+        
+        Match3Game game = new Match3Game(cells);
+        ArrayList<Match3Game.MatchingPair> pairs = game.GetMatchableCells();
+        int count = 0;
+        for (Match3Game.MatchingPair pair : pairs) {
+            String match = count++ + " match: " + pair.mLeft.get() + " and " + pair.mRight.get();
+            items.add(match);
+        }
+        if (pairs.isEmpty()) {
+            items.add("NO MATCHES POSSIBLE FOR THIS STATE!");
+        }
+
+        return swaps;
     }
 
     /**
