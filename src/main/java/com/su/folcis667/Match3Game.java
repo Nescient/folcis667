@@ -84,6 +84,26 @@ public class Match3Game {
         return rval;
     }
 
+    private static final String MATCHED = "MATCHEDCELL";
+
+    public static Cell[][] RemoveMatches(Cell[][] cells) {
+        while(ClearMatches(cells)){
+            ShiftCells(cells);
+        }
+        return cells;
+    }
+    
+    private static boolean ClearMatches(Cell[][] cells){
+        for(int i = 0; i < cells.length; ++i){
+            for(int j = 0; j < cells[i].length; ++j){
+                if (HasMatchingNeighbor(cells[i][j])){
+                    //
+                }
+            }
+        }
+        return false;
+    }
+
     public ArrayList<MatchingPair> GetMatchableCells() {
         ArrayList<MatchingPair> rval = new ArrayList<>();
         for (int i = 0; i < mCells.length; ++i) {

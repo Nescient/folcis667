@@ -159,7 +159,7 @@ public class jfxmain extends Application {
                 try {
                     int index = Integer.parseInt(newValue.split(" ")[0]);
                     Match3Game.MatchingPair pair = pairs.get(index);
-                    Cell[][] cells = game.GetNextState(pair);
+                    Cell[][] cells = Match3Game.RemoveMatches(game.GetNextState(pair));
                     NewStateView(row, col + 1, cells, mainView);
                 } catch (NumberFormatException ex) {
                     // do nothing.
