@@ -46,6 +46,7 @@ public class Match3Game {
 
     public final Cell[][] mCells;
     private final String[] mColors;
+    private static final String MATCHED = "MATCHEDCELL";
 
     public Match3Game(int cols, int rows, int colors) {
         mCells = new Cell[rows][cols];
@@ -84,20 +85,33 @@ public class Match3Game {
         return rval;
     }
 
-    private static final String MATCHED = "MATCHEDCELL";
-
-    public static Cell[][] RemoveMatches(Cell[][] cells) {
-        while(ClearMatches(cells)){
-            ShiftCells(cells);
+    public void RemoveMatches() {
+        while (ClearMatches()) {
+            ShiftCells();
         }
-        return cells;
+        return;
     }
-    
-    private static boolean ClearMatches(Cell[][] cells){
-        for(int i = 0; i < cells.length; ++i){
-            for(int j = 0; j < cells[i].length; ++j){
-                if (HasMatchingNeighbor(cells[i][j])){
-                    //
+
+    private boolean ClearMatches() {
+        boolean any_match = false;
+        for (int i = 0; i < mCells.length; ++i) {
+            for (int j = 0; j < mCells[i].length; ++j) {
+                if (HasMatchingNeighbor(mCells[i][j])) {
+                    mCells[i][j].c(MATCHED+Math.random());
+                    any_match = true;
+                }
+            }
+        }
+        return any_match;
+    }
+
+    private boolean ShiftCells() {
+        //find all the cells that have been set to matched, and move the cells above down.
+        // iterate backwards for efficiency
+        for (int i = mCells.length - 1; i >= 0; --i) {
+            for (int j = mCells[i].length - 1; j >= 0; --j) {
+                if (mCells[i][j].c() == null ? MATCHED == null : mCells[i][j].c().equals(MATCHED)) {
+                    // move the cells above down.
                 }
             }
         }
