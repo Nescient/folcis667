@@ -64,7 +64,7 @@ public class StateViewController implements Initializable {
             }
         }
     }
-    
+
     public static void refresh(Cell[][] cells, GridPane view) {
         view.getChildren().clear();
         int size = 250 / cells.length;

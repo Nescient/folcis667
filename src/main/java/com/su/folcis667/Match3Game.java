@@ -70,8 +70,12 @@ public class Match3Game {
             for (int j = 0; j < mCells[i].length; ++j) {
                 if (mCells[i][j] == change.mLeft) {
                     rval[i][j] = new Cell(change.mRight);
+                    rval[i][j].x(j);
+                    rval[i][j].y(i);
                 } else if (mCells[i][j] == change.mRight) {
                     rval[i][j] = new Cell(change.mLeft);
+                    rval[i][j].x(j);
+                    rval[i][j].y(i);
                 } else {
                     rval[i][j] = new Cell(mCells[i][j]);
                 }
