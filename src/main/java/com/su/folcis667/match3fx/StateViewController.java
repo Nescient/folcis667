@@ -49,16 +49,16 @@ public class StateViewController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-    //    StateViewPane = new GridPane();
         return;
     }
 
     public void refresh(Cell[][] cells) {
-        StateViewPane.getChildren().clear();
+        this.StateViewPane.getChildren().clear();
+        int size = 250 / cells.length;
         for (int i = 0; i < cells.length; ++i) {
             for (int j = 0; j < cells[i].length; ++j) {
                 Cell c = cells[i][j];
-                Rectangle c_rec = new Rectangle(5, 5);
+                Rectangle c_rec = new Rectangle(size, size);
                 c_rec.setFill(c.color());
                 this.StateViewPane.add(c_rec, c.x(), c.y());
             }

@@ -82,7 +82,7 @@ public class jfxmain extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
         
-        Match3Game asdf = new Match3Game(20, 20, 10);
+        Match3Game asdf = new Match3Game(5, 5, 4);
         state_view_controller.refresh(asdf.mCells);
     }
 

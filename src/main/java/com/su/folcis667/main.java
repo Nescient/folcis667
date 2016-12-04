@@ -47,6 +47,8 @@ public class main {
         System.out.println(test.c());
         System.out.println(test.x());
         System.out.println(test.y());
+        System.out.println(test.color());
+        Match3Game asdf = new Match3Game(20, 20, 10);
         try {
             Formula one = fp.parseFormula("NeighborX(A,B) <=> A.y = B.y ^ ((A.x = B.x + 1) V (A.x = B.x-1))");
         } catch (Exception ex) {
