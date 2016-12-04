@@ -36,6 +36,11 @@ public class Cell extends Variable {
         super(name);
     }
 
+    public Cell(Cell other) {
+        super(other.getSort().getName());
+        this.set(other.get());
+    }
+
     /**
      * This parses strings of the form [color, x, y].
      *
@@ -58,8 +63,18 @@ public class Cell extends Variable {
         return Integer.parseInt(this.value.split(DELIMITER)[1]);
     }
 
+    public void x(int x) {
+        String[] value_string = this.value.split(DELIMITER);
+        this.set(value_string[0] + DELIMITER + x + DELIMITER + value_string[2]);
+    }
+
     public int y() {
         return Integer.parseInt(this.value.split(DELIMITER)[2]);
+    }
+
+    public void y(int y) {
+        String[] value_string = this.value.split(DELIMITER);
+        this.set(value_string[0] + DELIMITER + value_string[1] + DELIMITER + y);
     }
 
 }
