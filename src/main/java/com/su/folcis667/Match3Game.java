@@ -26,8 +26,23 @@
 package com.su.folcis667;
 
 import com.su.folcis667.match3.Cell;
+import com.su.folcis667.match3.Matched;
+import com.su.folcis667.match3.NeighborX;
+import com.su.folcis667.match3.NeighborY;
+import java.util.ArrayList;
 
 public class Match3Game {
+
+    public class MatchingPair {
+
+        public final Cell mLeft;
+        public final Cell mRight;
+
+        MatchingPair(Cell left, Cell right) {
+            mLeft = left;
+            mRight = right;
+        }
+    }
 
     public final Cell[][] mCells;
     private final String[] mColors;
@@ -38,15 +53,92 @@ public class Match3Game {
         InitializeCells();
     }
 
+    public ArrayList<Cell[][]> GetNextState() {
+        ArrayList<Cell[][]> rval = new ArrayList<>();
+        return rval;
+    }
+
+    public ArrayList<MatchingPair> GetMatchableCells() {
+        ArrayList<MatchingPair> rval = new ArrayList<>();
+        for (int i = 0; i < mCells.length; ++i) {
+            for (int j = 0; j < mCells[i].length; ++j) {
+                if (SwapCreatesMatch(i, j, i, j + 1)) {
+                    rval.add(new MatchingPair(mCells[i][j], mCells[i][j]));
+                }
+            }
+        }
+        return rval;
+    }
+
+    private boolean SwapCreatesMatch(int row1, int col1, int row2, int col2) {
+        if (IsValidSwap(row1, col1, row2, col2)) {
+            Cell right = new Cell(mCells[row1][col1]);  // do the swap
+            Cell left = new Cell(mCells[row2][col2]);  // do the swap
+            return HasMatchingNeighbor(right) || HasMatchingNeighbor(left);
+        }
+        return false;
+    }
+
+    private boolean IsRealCell(int row, int col) {
+        return row < mCells.length && col < mCells[row].length;
+    }
+
+    private boolean IsValidSwap(int row1, int col1, int row2, int col2) {
+        boolean real_cells = (row1 < mCells.length) && (col1 < mCells[row1].length)
+                && (row2 < mCells.length) && (col2 < mCells[row2].length);
+        return real_cells
+                && (NeighborX.test(mCells[row1][col1], mCells[row2][col2])
+                || NeighborY.test(mCells[row1][col1], mCells[row2][col2]));
+    }
+
+    private boolean HasMatchingNeighbor(Cell test) {
+        boolean matched = false;
+        if (!matched && IsRealCell(test.x() - 2, test.y())) {
+            matched = Matched.test(mCells[test.y()][test.x() - 2],
+                    mCells[test.y()][test.x() - 1],
+                    test);
+        }
+        if (!matched && IsRealCell(test.x() - 1, test.y())
+                && IsRealCell(test.x() + 1, test.y())) {
+            matched = Matched.test(mCells[test.y()][test.x() - 1],
+                    test,
+                    mCells[test.y()][test.x() + 1]);
+        }
+        if (!matched && IsRealCell(test.x() + 2, test.y())) {
+            matched = Matched.test(test,
+                    mCells[test.y()][test.x() + 1],
+                    mCells[test.y()][test.x() + 2]);
+        }
+        if (!matched && IsRealCell(test.x(), test.y() - 2)) {
+            matched = Matched.test(mCells[test.y() - 2][test.x()],
+                    mCells[test.y() - 1][test.x()],
+                    test);
+        }
+        if (!matched && IsRealCell(test.x(), test.y() - 1)
+                && IsRealCell(test.x(), test.y() + 1)) {
+            matched = Matched.test(mCells[test.y() - 1][test.x()],
+                    test,
+                    mCells[test.y() + 1][test.x()]);
+        }
+        if (!matched && IsRealCell(test.x(), test.y() + 2)) {
+            matched = Matched.test(test,
+                    mCells[test.y() + 1][test.x()],
+                    mCells[test.y() + 2][test.x()]);
+        }
+        return matched;
+    }
+
+    private boolean MatchingCells(Cell A, Cell B, Cell C) {
+        return Matched.test(A, B, C);
+    }
+
     private void InitializeCells() {
         for (int i = 0; i < mCells.length; ++i) {
             for (int j = 0; j < mCells[i].length; ++j) {
-                mCells[i][j] = new Cell("Cell_"+Integer.toString(i) + "_" + Integer.toString(j));
+                mCells[i][j] = new Cell("Cell_" + Integer.toString(i) + "_" + Integer.toString(j));
                 String value = mColors[(i + j) % mColors.length];
                 value += "," + Integer.toString(i) + "," + Integer.toString(j);
                 mCells[i][j].set(value);
-                System.out.println(mCells[i][j].c());
-                System.out.println(mCells[i][j].color());
             }
         }
     }
