@@ -108,7 +108,7 @@ public class jfxmain extends Application {
             mThreadPool.submit(new FutureTask<String>(new Callable<String>() {
                 @Override
                 public String call() throws Exception {
-                    int num = next.GetMaxNumSuccessorMoves(0, 1);
+                    int num = next.GetMaxNumSuccessorMoves(0, 2, mThreadPool);
                     int index = items.indexOf(match);
                     String s = items.get(index) + " + " + num;
                     Platform.runLater(new Runnable() {
@@ -179,7 +179,7 @@ public class jfxmain extends Application {
                     + " and " + pair.mRight.get() + " | " + next.RemoveMatches();
             items.add(match);
             mThreadPool.submit(new FutureTask<>(() -> {
-                int num = next.GetMaxNumSuccessorMoves(0, 1);
+                int num = next.GetMaxNumSuccessorMoves(0, 2, mThreadPool);
                 int index = items.indexOf(match);
                 String s = items.get(index) + " + " + num;
                 Platform.runLater(() -> {

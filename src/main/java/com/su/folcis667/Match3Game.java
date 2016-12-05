@@ -30,6 +30,13 @@ import com.su.folcis667.match3.Matched;
 import com.su.folcis667.match3.NeighborX;
 import com.su.folcis667.match3.NeighborY;
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Match3Game {
 
@@ -255,21 +262,43 @@ public class Match3Game {
         return null;
     }
 
-    public int GetMaxNumSuccessorMoves(int depth, int maxDepth) {
+    public int GetMaxNumSuccessorMoves(int depth, int maxDepth, ExecutorService service) {
         if (depth > maxDepth) {
             return 0;
         }
-        int my_matches = this.RemoveMatches();
         int num_moves = 0;
         ArrayList<MatchingPair> pairs = this.GetMatchableCells();
         for (MatchingPair pair : pairs) {
             Match3Game next = new Match3Game(this.GetNextState(pair));
             int num_next_moves = next.RemoveMatches();
-            num_next_moves += next.GetMaxNumSuccessorMoves(depth + 1, maxDepth);
+
+            FutureTask<Integer> future
+                    = new FutureTask<Integer>(new Callable<Integer>() {
+                        public Integer call() {
+                            return next.GetMaxNumSuccessorMoves(depth + 1, maxDepth, service);
+                        }
+                    });
+            service.execute(future);
+            try {
+                num_next_moves += future.get();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Match3Game.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ExecutionException ex) {
+                Logger.getLogger(Match3Game.class.getName()).log(Level.SEVERE, null, ex);
+            }
+//
+//     executor.execute(future);
+//            Future<Integer> x = service.submit(new FutureTask<Integer>())
+//            
+//            num_next_moves+=(int)service.submit(new FutureTask<>(() -> {
+//                return new Integer(next.GetMaxNumSuccessorMoves(depth+1, maxDepth, service));
+//            })).get();
+
+//            num_next_moves += next.GetMaxNumSuccessorMoves(depth + 1, maxDepth, service);
             if (num_next_moves > num_moves) {
                 num_moves = num_next_moves;
             }
         }
-        return my_matches + num_moves;
+        return num_moves;
     }
 }
