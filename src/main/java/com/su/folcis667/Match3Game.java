@@ -255,15 +255,17 @@ public class Match3Game {
         return null;
     }
 
-    public int GetMaxNumSuccessorMoves(int depth) {
-        if (depth > 1){return 0;}
+    public int GetMaxNumSuccessorMoves(int depth, int maxDepth) {
+        if (depth > maxDepth) {
+            return 0;
+        }
         int my_matches = this.RemoveMatches();
         int num_moves = 0;
         ArrayList<MatchingPair> pairs = this.GetMatchableCells();
         for (MatchingPair pair : pairs) {
             Match3Game next = new Match3Game(this.GetNextState(pair));
             int num_next_moves = next.RemoveMatches();
-            num_next_moves += next.GetMaxNumSuccessorMoves(depth + 1);
+            num_next_moves += next.GetMaxNumSuccessorMoves(depth + 1, maxDepth);
             if (num_next_moves > num_moves) {
                 num_moves = num_next_moves;
             }
