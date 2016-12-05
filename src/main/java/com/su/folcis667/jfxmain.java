@@ -101,16 +101,16 @@ public class jfxmain extends Application {
         ArrayList<Match3Game.MatchingPair> pairs = asdf.GetMatchableCells();
         int count = 0;
         for (Match3Game.MatchingPair pair : pairs) {
+            Match3Game next = new Match3Game(asdf.GetNextState(pair));
             String match = count++ + " match: " + pair.mLeft.get()
-                    + " and " + pair.mRight.get() ;//+ " | ";// + new Match3Game(
-//                            asdf.GetNextState(pair)).GetMaxNumSuccessorMoves(0, 1);
-            final Match3Game next = new Match3Game(asdf.GetNextState(pair));
+                    + " and " + pair.mRight.get() + " | " + next.RemoveMatches();
+            
             mThreadPool.submit(new FutureTask<String>(new Callable<String>() {
                 @Override
                 public String call() throws Exception {
                     int num = next.GetMaxNumSuccessorMoves(0, 1);
                     int index = items.indexOf(match);
-                    String s = items.get(index) + " | " + num;
+                    String s = items.get(index) + " + " + num;
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
@@ -174,10 +174,19 @@ public class jfxmain extends Application {
         ArrayList<Match3Game.MatchingPair> pairs = game.GetMatchableCells();
         int count = 0;
         for (Match3Game.MatchingPair pair : pairs) {
+            Match3Game next = new Match3Game(game.GetNextState(pair));
             String match = count++ + " match: " + pair.mLeft.get()
-                    + " and " + pair.mRight.get() + " | " + new Match3Game(
-                            game.GetNextState(pair)).GetMaxNumSuccessorMoves(0, 1);
+                    + " and " + pair.mRight.get() + " | " + next.RemoveMatches();
             items.add(match);
+            mThreadPool.submit(new FutureTask<>(() -> {
+                int num = next.GetMaxNumSuccessorMoves(0, 1);
+                int index = items.indexOf(match);
+                String s = items.get(index) + " + " + num;
+                Platform.runLater(() -> {
+                    items.set(index, s);
+                });
+                return s;
+            }));
         }
         if (pairs.isEmpty()) {
             items.add("NO MATCHES POSSIBLE FOR THIS STATE!");
