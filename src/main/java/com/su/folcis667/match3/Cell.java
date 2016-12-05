@@ -40,6 +40,7 @@ public class Cell extends Variable {
     public Cell(Cell other) {
         super(other.getSort().getName());
         this.set(other.get());
+        this.mInvisible = other.mInvisible;
     }
 
     /**

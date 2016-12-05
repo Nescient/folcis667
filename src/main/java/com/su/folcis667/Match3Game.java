@@ -95,7 +95,8 @@ public class Match3Game {
         boolean any_match = false;
         for (int i = 0; i < mCells.length; ++i) {
             for (int j = 0; j < mCells[i].length; ++j) {
-                if (HasMatchingNeighbor(mCells[i][j], true)) {
+                if (!Matched.IGNORE_COLOR.equals(mCells[i][j].c())
+                        && HasMatchingNeighbor(mCells[i][j], true)) {
                     any_match |= mCells[i][j].color().isOpaque();
                     mCells[i][j].invisible(true);
                 }
@@ -110,7 +111,15 @@ public class Match3Game {
         for (int i = mCells.length - 1; i >= 0; --i) {
             for (int j = mCells[i].length - 1; j >= 0; --j) {
                 if (!mCells[i][j].color().isOpaque()) {
-                    // move the cells above down.
+                    for (int k = i; k > 0; --k) {
+                        Cell update = new Cell(mCells[k - 1][j]);
+                        update.y(mCells[k][j].y());
+                        mCells[k][j] = update;
+                    }
+                    mCells[0][j] = new Cell(mCells[0][j]);
+                    mCells[0][j].c(Matched.IGNORE_COLOR);
+                    mCells[0][j].invisible(false);
+                    ++j;
                 }
             }
         }
@@ -160,7 +169,7 @@ public class Match3Game {
                 && (NeighborX.test(mCells[row1][col1], mCells[row2][col2])
                 || NeighborY.test(mCells[row1][col1], mCells[row2][col2]));
     }
-    
+
     private boolean HasMatchingNeighbor(Cell test) {
         return HasMatchingNeighbor(test, false);
     }

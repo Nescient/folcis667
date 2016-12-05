@@ -30,6 +30,8 @@ import net.sf.tweety.logics.commons.syntax.Predicate;
 
 public class Matched extends Predicate {
 
+    public static String IGNORE_COLOR = "BLACK";
+
     public Matched() {
         super("Matched", 3 /*arity*/);
     }
@@ -43,7 +45,8 @@ public class Matched extends Predicate {
     public static boolean test(Cell A, Cell B, Cell C) {
         return Aligned.test(A, B, C)
                 && color_match(A.color(), B.color())
-                && color_match(B.color(), C.color());
+                && color_match(B.color(), C.color())
+                && !IGNORE_COLOR.equals(A.c());
     }
 
     public static boolean test(Cell A, Cell B, Cell C, boolean ignoreInvisible) {
