@@ -31,6 +31,7 @@ import net.sf.tweety.logics.commons.syntax.Variable;
 public class Cell extends Variable {
 
     final String DELIMITER = ",";
+    boolean mInvisible = false;
 
     public Cell(String name) {
         super(name);
@@ -55,8 +56,18 @@ public class Cell extends Variable {
         return this.value.split(DELIMITER)[0];
     }
 
+    public void c(String c) {
+        String[] value_string = this.value.split(DELIMITER);
+        this.set(c + DELIMITER + value_string[1] + DELIMITER + value_string[2]);
+    }
+
+    public void invisible(boolean gone) {
+        this.mInvisible = gone;
+        return;
+    }
+
     public Color color() {
-        return Color.web(this.c());
+        return Color.web(this.c(), this.mInvisible ? 0 : 1);
     }
 
     public int x() {

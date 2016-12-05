@@ -46,7 +46,6 @@ public class Match3Game {
 
     public final Cell[][] mCells;
     private final String[] mColors;
-    private static final String MATCHED = "MATCHEDCELL";
 
     public Match3Game(int cols, int rows, int colors) {
         mCells = new Cell[rows][cols];
@@ -96,9 +95,9 @@ public class Match3Game {
         boolean any_match = false;
         for (int i = 0; i < mCells.length; ++i) {
             for (int j = 0; j < mCells[i].length; ++j) {
-                if (HasMatchingNeighbor(mCells[i][j])) {
-                    mCells[i][j].c(MATCHED+Math.random());
-                    any_match = true;
+                if (HasMatchingNeighbor(mCells[i][j], true)) {
+                    any_match |= mCells[i][j].color().isOpaque();
+                    mCells[i][j].invisible(true);
                 }
             }
         }
@@ -110,7 +109,7 @@ public class Match3Game {
         // iterate backwards for efficiency
         for (int i = mCells.length - 1; i >= 0; --i) {
             for (int j = mCells[i].length - 1; j >= 0; --j) {
-                if (mCells[i][j].c() == null ? MATCHED == null : mCells[i][j].c().equals(MATCHED)) {
+                if (!mCells[i][j].color().isOpaque()) {
                     // move the cells above down.
                 }
             }
@@ -161,40 +160,44 @@ public class Match3Game {
                 && (NeighborX.test(mCells[row1][col1], mCells[row2][col2])
                 || NeighborY.test(mCells[row1][col1], mCells[row2][col2]));
     }
-
+    
     private boolean HasMatchingNeighbor(Cell test) {
+        return HasMatchingNeighbor(test, false);
+    }
+
+    private boolean HasMatchingNeighbor(Cell test, boolean ignoreInvisible) {
         boolean matched = false;
         if (!matched && IsRealCell(test.x() - 2, test.y())) {
             matched = Matched.test(mCells[test.y()][test.x() - 2],
                     mCells[test.y()][test.x() - 1],
-                    test);
+                    test, ignoreInvisible);
         }
         if (!matched && IsRealCell(test.x() - 1, test.y())
                 && IsRealCell(test.x() + 1, test.y())) {
             matched = Matched.test(mCells[test.y()][test.x() - 1],
                     test,
-                    mCells[test.y()][test.x() + 1]);
+                    mCells[test.y()][test.x() + 1], ignoreInvisible);
         }
         if (!matched && IsRealCell(test.x() + 2, test.y())) {
             matched = Matched.test(test,
                     mCells[test.y()][test.x() + 1],
-                    mCells[test.y()][test.x() + 2]);
+                    mCells[test.y()][test.x() + 2], ignoreInvisible);
         }
         if (!matched && IsRealCell(test.x(), test.y() - 2)) {
             matched = Matched.test(mCells[test.y() - 2][test.x()],
                     mCells[test.y() - 1][test.x()],
-                    test);
+                    test, ignoreInvisible);
         }
         if (!matched && IsRealCell(test.x(), test.y() - 1)
                 && IsRealCell(test.x(), test.y() + 1)) {
             matched = Matched.test(mCells[test.y() - 1][test.x()],
                     test,
-                    mCells[test.y() + 1][test.x()]);
+                    mCells[test.y() + 1][test.x()], ignoreInvisible);
         }
         if (!matched && IsRealCell(test.x(), test.y() + 2)) {
             matched = Matched.test(test,
                     mCells[test.y() + 1][test.x()],
-                    mCells[test.y() + 2][test.x()]);
+                    mCells[test.y() + 2][test.x()], ignoreInvisible);
         }
         return matched;
     }

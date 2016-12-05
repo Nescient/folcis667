@@ -41,6 +41,7 @@ import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
@@ -126,8 +127,10 @@ public class jfxmain extends Application {
     }
 
     ListView<String> NewStateView(int row, int col, Cell[][] cells, GridPane mainView) {
+        Match3Game game = new Match3Game(cells);
+        game.RemoveMatches();
         GridPane state_view = new GridPane();
-        StateViewController.refresh(cells, state_view);
+        StateViewController.refresh(game.mCells, state_view);
 
         ListView<String> swaps = new ListView<>();
         ObservableList<String> items = FXCollections.observableArrayList();
@@ -136,10 +139,17 @@ public class jfxmain extends Application {
         mainView.getColumnConstraints().add(new ColumnConstraints(250));
         mainView.getRowConstraints().add(new RowConstraints(250));
 
+        for (Node node : mainView.getChildren()) {
+            if (node instanceof GridPane
+                    && mainView.getColumnIndex(node) == row
+                    && mainView.getRowIndex(node) == col) {
+                mainView.getChildren().remove(node);
+                break;
+            }
+        }
         mainView.add(state_view, row, col);
         mainView.add(swaps, row + 1, col);
 
-        Match3Game game = new Match3Game(cells);
         ArrayList<Match3Game.MatchingPair> pairs = game.GetMatchableCells();
         int count = 0;
         for (Match3Game.MatchingPair pair : pairs) {
@@ -159,7 +169,7 @@ public class jfxmain extends Application {
                 try {
                     int index = Integer.parseInt(newValue.split(" ")[0]);
                     Match3Game.MatchingPair pair = pairs.get(index);
-                    Cell[][] cells = Match3Game.RemoveMatches(game.GetNextState(pair));
+                    Cell[][] cells = game.GetNextState(pair);
                     NewStateView(row, col + 1, cells, mainView);
                 } catch (NumberFormatException ex) {
                     // do nothing.

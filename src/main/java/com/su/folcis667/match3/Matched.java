@@ -25,6 +25,7 @@
  */
 package com.su.folcis667.match3;
 
+import javafx.scene.paint.Color;
 import net.sf.tweety.logics.commons.syntax.Predicate;
 
 public class Matched extends Predicate {
@@ -33,9 +34,22 @@ public class Matched extends Predicate {
         super("Matched", 3 /*arity*/);
     }
 
+    private static boolean color_match(Color a, Color b) {
+        return a.getRed() == b.getRed()
+                && a.getBlue() == b.getBlue()
+                && a.getGreen() == b.getGreen();
+    }
+
     public static boolean test(Cell A, Cell B, Cell C) {
         return Aligned.test(A, B, C)
-                && A.color() == B.color()
-                && B.color() == C.color();
+                && color_match(A.color(), B.color())
+                && color_match(B.color(), C.color());
+    }
+
+    public static boolean test(Cell A, Cell B, Cell C, boolean ignoreInvisible) {
+        boolean all_cells_visible = A.color().isOpaque()
+                && B.color().isOpaque()
+                && C.color().isOpaque();
+        return Matched.test(A, B, C) && (all_cells_visible || ignoreInvisible);
     }
 }
