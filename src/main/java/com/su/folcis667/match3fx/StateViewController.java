@@ -30,7 +30,6 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.shape.Rectangle;
 
@@ -44,12 +43,9 @@ public class StateViewController implements Initializable {
     @FXML
     private GridPane StateViewPane;
 
-    /**
-     * Initializes the controller class.
-     */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        return;
+        /* do nothing */
     }
 
     public void refresh(Cell[][] cells) {

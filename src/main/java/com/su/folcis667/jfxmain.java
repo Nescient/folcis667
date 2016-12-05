@@ -60,7 +60,8 @@ public class jfxmain extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        FXMLLoader fxml_loader = new FXMLLoader(getClass().getResource("/match3fx/StateView.fxml"));
+        FXMLLoader fxml_loader = new FXMLLoader(
+                getClass().getResource("/match3fx/StateView.fxml"));
         GridPane state_view = null;
         try {
             state_view = (GridPane) fxml_loader.load();
@@ -68,7 +69,8 @@ public class jfxmain extends Application {
             Logger.getLogger(jfxmain.class.getName()).log(Level.SEVERE, null, ex);
             return;
         }
-        StateViewController state_view_controller = (StateViewController) fxml_loader.getController();
+        StateViewController state_view_controller
+                = (StateViewController) fxml_loader.getController();
 
         ListView<String> swaps = new ListView<>();
         ObservableList<String> items = FXCollections.observableArrayList();
@@ -98,7 +100,8 @@ public class jfxmain extends Application {
         ArrayList<Match3Game.MatchingPair> pairs = asdf.GetMatchableCells();
         int count = 0;
         for (Match3Game.MatchingPair pair : pairs) {
-            String match = count++ + " match: " + pair.mLeft.get() + " and " + pair.mRight.get();
+            String match = count++ + " match: " + pair.mLeft.get()
+                    + " and " + pair.mRight.get();
 //            match += pair.mLeft.c() + " match: ";
 //            match += "(" + pair.mLeft.x() + ", " + pair.mLeft.y() + ")";
 //            match += " and (" + pair.mRight.x() + ", " + pair.mRight.y() + ")";
@@ -108,10 +111,12 @@ public class jfxmain extends Application {
             items.add("NO MATCHES POSSIBLE FOR THIS STATE!");
         }
 
-        swaps.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+        swaps.getSelectionModel().selectedItemProperty().addListener(
+                new ChangeListener<String>() {
 
             @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+            public void changed(ObservableValue<? extends String> observable,
+                    String oldValue, String newValue) {
                 // Your action here
                 System.out.println("Selected item: " + newValue);
                 try {
@@ -126,7 +131,8 @@ public class jfxmain extends Application {
         });
     }
 
-    ListView<String> NewStateView(int row, int col, Cell[][] cells, GridPane mainView) {
+    ListView<String> NewStateView(int row, int col,
+            Cell[][] cells, GridPane mainView) {
         Match3Game game = new Match3Game(cells);
         game.RemoveMatches();
         GridPane state_view = new GridPane();
@@ -153,19 +159,20 @@ public class jfxmain extends Application {
         ArrayList<Match3Game.MatchingPair> pairs = game.GetMatchableCells();
         int count = 0;
         for (Match3Game.MatchingPair pair : pairs) {
-            String match = count++ + " match: " + pair.mLeft.get() + " and " + pair.mRight.get();
+            String match = count++ + " match: " + pair.mLeft.get()
+                    + " and " + pair.mRight.get();
             items.add(match);
         }
         if (pairs.isEmpty()) {
             items.add("NO MATCHES POSSIBLE FOR THIS STATE!");
         }
 
-        swaps.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+        swaps.getSelectionModel().selectedItemProperty().addListener(
+                new ChangeListener<String>() {
 
             @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                // Your action here
-                System.out.println("Selected item: " + newValue);
+            public void changed(ObservableValue<? extends String> observable,
+                    String oldValue, String newValue) {
                 try {
                     int index = Integer.parseInt(newValue.split(" ")[0]);
                     Match3Game.MatchingPair pair = pairs.get(index);

@@ -106,8 +106,6 @@ public class Match3Game {
     }
 
     private boolean ShiftCells() {
-        //find all the cells that have been set to matched, and move the cells above down.
-        // iterate backwards for efficiency
         for (int i = mCells.length - 1; i >= 0; --i) {
             for (int j = mCells[i].length - 1; j >= 0; --j) {
                 if (!mCells[i][j].color().isOpaque()) {
@@ -150,7 +148,8 @@ public class Match3Game {
             mCells[row1][col1].y(old_right.y());
             mCells[row2][col2].x(old_left.x());
             mCells[row2][col2].y(old_left.y());
-            rval = HasMatchingNeighbor(mCells[row1][col1]) || HasMatchingNeighbor(mCells[row2][col2]);
+            rval = HasMatchingNeighbor(mCells[row1][col1])
+                    || HasMatchingNeighbor(mCells[row2][col2]);
             mCells[row1][col1].x(old_left.x());
             mCells[row1][col1].y(old_left.y());
             mCells[row2][col2].x(old_right.x());
@@ -214,8 +213,11 @@ public class Match3Game {
     private void InitializeCells() {
         for (int i = 0; i < mCells.length; ++i) {
             for (int j = 0; j < mCells[i].length; ++j) {
-                mCells[i][j] = new Cell("Cell_" + Integer.toString(j) + "_" + Integer.toString(i));
-                int index = (i == mCells.length - 1) ? (i + j + 1) % mColors.length : (i + j) % mColors.length;
+                mCells[i][j] = new Cell("Cell_"
+                        + Integer.toString(j) + "_" + Integer.toString(i));
+                int index = (i == mCells.length - 1)
+                        ? (i + j + 1) % mColors.length
+                        : (i + j) % mColors.length;
                 String value = mColors[index];
                 value += "," + Integer.toString(j) + "," + Integer.toString(i);
                 mCells[i][j].set(value);
@@ -238,15 +240,20 @@ public class Match3Game {
             case 5:
                 return new String[]{"red", "blue", "green", "orange", "purple"};
             case 6:
-                return new String[]{"red", "blue", "green", "orange", "purple", "yellow"};
+                return new String[]{"red", "blue", "green", "orange", "purple",
+                    "yellow"};
             case 7:
-                return new String[]{"red", "blue", "green", "orange", "purple", "yellow", "white"};
+                return new String[]{"red", "blue", "green", "orange", "purple",
+                    "yellow", "white"};
             case 8:
-                return new String[]{"red", "blue", "green", "orange", "purple", "yellow", "white", "cyan"};
+                return new String[]{"red", "blue", "green", "orange", "purple",
+                    "yellow", "white", "cyan"};
             case 9:
-                return new String[]{"red", "blue", "green", "orange", "purple", "yellow", "white", "cyan", "pink"};
+                return new String[]{"red", "blue", "green", "orange", "purple",
+                    "yellow", "white", "cyan", "pink"};
             case 10:
-                return new String[]{"red", "blue", "green", "orange", "purple", "yellow", "white", "cyan", "pink", "yellowgreen"};
+                return new String[]{"red", "blue", "green", "orange", "purple",
+                    "yellow", "white", "cyan", "pink", "yellowgreen"};
         }
         return null;
     }
