@@ -33,6 +33,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -41,6 +42,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -50,6 +52,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 /**
  *
@@ -62,6 +65,15 @@ public class jfxmain extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        //http://stackoverflow.com/questions/14897194/stop-threads-before-close-my-javafx-program
+//        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+//            @Override
+//            public void handle(WindowEvent e) {
+//                Platform.exit();
+//                System.exit(0);
+//            }
+//        });
+
         FXMLLoader fxml_loader = new FXMLLoader(
                 getClass().getResource("/match3fx/StateView.fxml"));
         GridPane state_view = null;
@@ -104,7 +116,7 @@ public class jfxmain extends Application {
             Match3Game next = new Match3Game(asdf.GetNextState(pair));
             String match = count++ + " match: " + pair.mLeft.get()
                     + " and " + pair.mRight.get() + " | " + next.RemoveMatches();
-            
+
             mThreadPool.submit(new FutureTask<String>(new Callable<String>() {
                 @Override
                 public String call() throws Exception {
@@ -217,6 +229,14 @@ public class jfxmain extends Application {
      */
     public static void main(String[] args) {
         launch(args);
+
+        mThreadPool.shutdown();
+        try {
+            mThreadPool.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(jfxmain.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        mThreadPool.shutdownNow();
     }
 
 }
