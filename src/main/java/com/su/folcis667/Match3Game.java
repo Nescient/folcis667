@@ -262,7 +262,7 @@ public class Match3Game {
         return null;
     }
 
-    public int GetMaxNumSuccessorMoves(int depth, int maxDepth, ExecutorService service) {
+    public int GetMaxNumSuccessorMoves(int depth, int maxDepth) {
         if (depth > maxDepth) {
             return 0;
         }
@@ -271,30 +271,7 @@ public class Match3Game {
         for (MatchingPair pair : pairs) {
             Match3Game next = new Match3Game(this.GetNextState(pair));
             int num_next_moves = next.RemoveMatches();
-
-            FutureTask<Integer> future
-                    = new FutureTask<Integer>(new Callable<Integer>() {
-                        public Integer call() {
-                            return next.GetMaxNumSuccessorMoves(depth + 1, maxDepth, service);
-                        }
-                    });
-            service.execute(future);
-            try {
-                num_next_moves += future.get();
-            } catch (InterruptedException ex) {
-                Logger.getLogger(Match3Game.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ExecutionException ex) {
-                Logger.getLogger(Match3Game.class.getName()).log(Level.SEVERE, null, ex);
-            }
-//
-//     executor.execute(future);
-//            Future<Integer> x = service.submit(new FutureTask<Integer>())
-//            
-//            num_next_moves+=(int)service.submit(new FutureTask<>(() -> {
-//                return new Integer(next.GetMaxNumSuccessorMoves(depth+1, maxDepth, service));
-//            })).get();
-
-//            num_next_moves += next.GetMaxNumSuccessorMoves(depth + 1, maxDepth, service);
+            num_next_moves += next.GetMaxNumSuccessorMoves(depth + 1, maxDepth);
             if (num_next_moves > num_moves) {
                 num_moves = num_next_moves;
             }
