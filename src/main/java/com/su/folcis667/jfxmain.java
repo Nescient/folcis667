@@ -29,9 +29,14 @@ import com.su.folcis667.match3.Cell;
 import com.su.folcis667.match3fx.StateViewController;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -51,6 +56,9 @@ import javafx.stage.Stage;
  * @author me
  */
 public class jfxmain extends Application {
+
+    private static final ExecutorService mThreadPool
+            = Executors.newFixedThreadPool(5);
 
     @Override
     public void start(Stage primaryStage) {
@@ -94,8 +102,24 @@ public class jfxmain extends Application {
         int count = 0;
         for (Match3Game.MatchingPair pair : pairs) {
             String match = count++ + " match: " + pair.mLeft.get()
-                    + " and " + pair.mRight.get() + " | " + new Match3Game(
-                            asdf.GetNextState(pair)).GetMaxNumSuccessorMoves(0, 1);
+                    + " and " + pair.mRight.get() ;//+ " | ";// + new Match3Game(
+//                            asdf.GetNextState(pair)).GetMaxNumSuccessorMoves(0, 1);
+            final Match3Game next = new Match3Game(asdf.GetNextState(pair));
+            mThreadPool.submit(new FutureTask<String>(new Callable<String>() {
+                @Override
+                public String call() throws Exception {
+                    int num = next.GetMaxNumSuccessorMoves(0, 1);
+                    int index = items.indexOf(match);
+                    String s = items.get(index) + " | " + num;
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            items.set(index, s);
+                        }
+                    });
+                    return s;
+                }
+            }));
             items.add(match);
         }
         if (pairs.isEmpty()) {
