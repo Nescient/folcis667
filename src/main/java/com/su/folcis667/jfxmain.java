@@ -81,7 +81,6 @@ public class jfxmain extends Application {
         main_view.getRowConstraints().add(new RowConstraints(250));
         main_view.setHgap(5);
         main_view.setVgap(5);
-//        main_view.setPadding(new Insets(10, 10, 10, 10));
         main_view.add(state_view, 0, 0);
         main_view.add(swaps, 1, 0);
 
@@ -102,9 +101,6 @@ public class jfxmain extends Application {
         for (Match3Game.MatchingPair pair : pairs) {
             String match = count++ + " match: " + pair.mLeft.get()
                     + " and " + pair.mRight.get();
-//            match += pair.mLeft.c() + " match: ";
-//            match += "(" + pair.mLeft.x() + ", " + pair.mLeft.y() + ")";
-//            match += " and (" + pair.mRight.x() + ", " + pair.mRight.y() + ")";
             items.add(match);
         }
         if (pairs.isEmpty()) {
@@ -123,7 +119,7 @@ public class jfxmain extends Application {
                     int index = Integer.parseInt(newValue.split(" ")[0]);
                     Match3Game.MatchingPair pair = pairs.get(index);
                     Cell[][] cells = asdf.GetNextState(pair);
-                    NewStateView(0, 1, cells, main_view);
+                    NewStateView(1, 0, cells, main_view);
                 } catch (NumberFormatException ex) {
                     // do nothing.
                 }
@@ -147,14 +143,14 @@ public class jfxmain extends Application {
 
         for (Node node : mainView.getChildren()) {
             if (node instanceof GridPane
-                    && mainView.getColumnIndex(node) == row
-                    && mainView.getRowIndex(node) == col) {
+                    && mainView.getColumnIndex(node) == col
+                    && mainView.getRowIndex(node) == row) {
                 mainView.getChildren().remove(node);
                 break;
             }
         }
-        mainView.add(state_view, row, col);
-        mainView.add(swaps, row + 1, col);
+        mainView.add(state_view, col, row);
+        mainView.add(swaps, col + 1, row);
 
         ArrayList<Match3Game.MatchingPair> pairs = game.GetMatchableCells();
         int count = 0;
@@ -177,7 +173,7 @@ public class jfxmain extends Application {
                     int index = Integer.parseInt(newValue.split(" ")[0]);
                     Match3Game.MatchingPair pair = pairs.get(index);
                     Cell[][] cells = game.GetNextState(pair);
-                    NewStateView(row, col + 1, cells, mainView);
+                    NewStateView(row + 1, col, cells, mainView);
                 } catch (NumberFormatException ex) {
                     // do nothing.
                 }

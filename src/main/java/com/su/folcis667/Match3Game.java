@@ -56,12 +56,6 @@ public class Match3Game {
     public Match3Game(Cell[][] cells) {
         mCells = cells;
         mColors = GenerateColors(0);
-//        mCells = new Cell[cells.length][cells[0].length];  // java is the worst
-//        for (int i = 0; i < mCells.length; ++i) {
-//            for (int j = 0; j < mCells[i].length; ++i) {
-//                mCells[i][j] = new Cell(cells[i][j]);
-//            }
-//        }
     }
 
     public Cell[][] GetNextState(MatchingPair change) {
