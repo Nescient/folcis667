@@ -36,20 +36,14 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 /**
@@ -100,7 +94,8 @@ public class jfxmain extends Application {
         int count = 0;
         for (Match3Game.MatchingPair pair : pairs) {
             String match = count++ + " match: " + pair.mLeft.get()
-                    + " and " + pair.mRight.get();
+                    + " and " + pair.mRight.get() + " | " + new Match3Game(
+                            asdf.GetNextState(pair)).GetMaxNumSuccessorMoves(0, 1);
             items.add(match);
         }
         if (pairs.isEmpty()) {
@@ -156,7 +151,8 @@ public class jfxmain extends Application {
         int count = 0;
         for (Match3Game.MatchingPair pair : pairs) {
             String match = count++ + " match: " + pair.mLeft.get()
-                    + " and " + pair.mRight.get();
+                    + " and " + pair.mRight.get() + " | " + new Match3Game(
+                            game.GetNextState(pair)).GetMaxNumSuccessorMoves(0, 1);
             items.add(match);
         }
         if (pairs.isEmpty()) {

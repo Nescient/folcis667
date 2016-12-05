@@ -78,11 +78,12 @@ public class Match3Game {
         return rval;
     }
 
-    public void RemoveMatches() {
+    public int RemoveMatches() {
+        int num_removed = 0;
         while (ClearMatches()) {
-            ShiftCells();
+            num_removed += ShiftCells();
         }
-        return;
+        return num_removed;
     }
 
     private boolean ClearMatches() {
@@ -99,7 +100,8 @@ public class Match3Game {
         return any_match;
     }
 
-    private boolean ShiftCells() {
+    private int ShiftCells() {
+        int num_removed = 0;
         for (int i = mCells.length - 1; i >= 0; --i) {
             for (int j = mCells[i].length - 1; j >= 0; --j) {
                 if (!mCells[i][j].color().isOpaque()) {
@@ -112,10 +114,11 @@ public class Match3Game {
                     mCells[0][j].c(Matched.IGNORE_COLOR);
                     mCells[0][j].invisible(false);
                     ++j;
+                    ++num_removed;
                 }
             }
         }
-        return false;
+        return num_removed;
     }
 
     public ArrayList<MatchingPair> GetMatchableCells() {
@@ -252,4 +255,19 @@ public class Match3Game {
         return null;
     }
 
+    public int GetMaxNumSuccessorMoves(int depth) {
+        if (depth > 1){return 0;}
+        int my_matches = this.RemoveMatches();
+        int num_moves = 0;
+        ArrayList<MatchingPair> pairs = this.GetMatchableCells();
+        for (MatchingPair pair : pairs) {
+            Match3Game next = new Match3Game(this.GetNextState(pair));
+            int num_next_moves = next.RemoveMatches();
+            num_next_moves += next.GetMaxNumSuccessorMoves(depth + 1);
+            if (num_next_moves > num_moves) {
+                num_moves = num_next_moves;
+            }
+        }
+        return my_matches + num_moves;
+    }
 }

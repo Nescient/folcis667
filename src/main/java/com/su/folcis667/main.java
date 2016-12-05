@@ -26,15 +26,11 @@
 package com.su.folcis667;
 
 import com.su.folcis667.match3.Cell;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import net.sf.tweety.commons.Formula;
-import net.sf.tweety.logics.fol.FolBeliefSet;
 import net.sf.tweety.logics.fol.parser.FolParser;
 import net.sf.tweety.logics.fol.syntax.FolFormula;
-import net.sf.tweety.logics.fol.syntax.QuantifiedFormula;
 
 public class main {
 
