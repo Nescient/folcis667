@@ -26,6 +26,7 @@
 package com.su.folcis667;
 
 import com.su.folcis667.match3.Cell;
+import com.su.folcis667.match3fx.MainViewController;
 import com.su.folcis667.match3fx.StateViewController;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,6 +49,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
@@ -75,153 +77,20 @@ public class jfxmain extends Application {
         });
 
         FXMLLoader fxml_loader = new FXMLLoader(
-                getClass().getResource("/match3fx/StateView.fxml"));
-        GridPane state_view = null;
+                getClass().getResource("/match3fx/MainView.fxml"));
+        BorderPane view = null;
         try {
-            state_view = (GridPane) fxml_loader.load();
+            view = (BorderPane) fxml_loader.load();
         } catch (IOException ex) {
             Logger.getLogger(jfxmain.class.getName()).log(Level.SEVERE, null, ex);
             return;
         }
-        StateViewController state_view_controller
-                = (StateViewController) fxml_loader.getController();
+        MainViewController controller = (MainViewController) fxml_loader.getController();
 
-        ListView<String> swaps = new ListView<>();
-        ObservableList<String> items = FXCollections.observableArrayList();
-        swaps.setItems(items);
-
-        GridPane main_view = new GridPane();
-        main_view.getColumnConstraints().add(new ColumnConstraints(250));
-        main_view.getRowConstraints().add(new RowConstraints(250));
-        main_view.setHgap(5);
-        main_view.setVgap(5);
-        main_view.add(state_view, 0, 0);
-        main_view.add(swaps, 1, 0);
-
-        ScrollPane s1 = new ScrollPane();
-        s1.setPrefSize(800, 650);
-        s1.setContent(main_view);
-
-        Scene scene = new Scene(s1, 800, 650);
+        Scene scene = new Scene(view, 800, 650);
         primaryStage.setTitle("Match 3 Puzzle Solver");
         primaryStage.setScene(scene);
         primaryStage.show();
-
-        Match3Game asdf = new Match3Game(5, 5, 3);
-        state_view_controller.refresh(asdf.mCells);
-
-        ArrayList<Match3Game.MatchingPair> pairs = asdf.GetMatchableCells();
-        int count = 0;
-        for (Match3Game.MatchingPair pair : pairs) {
-            Match3Game next = new Match3Game(asdf.GetNextState(pair));
-            String match = count++ + " match: " + pair.mLeft.get()
-                    + " and " + pair.mRight.get() + " | " + next.RemoveMatches();
-
-            mThreadPool.submit(new FutureTask<String>(new Callable<String>() {
-                @Override
-                public String call() throws Exception {
-                    int num = next.GetMaxNumSuccessorMoves(0, 2);
-                    int index = items.indexOf(match);
-                    String s = items.get(index) + " + " + num;
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            items.set(index, s);
-                        }
-                    });
-                    return s;
-                }
-            }));
-            items.add(match);
-        }
-        if (pairs.isEmpty()) {
-            items.add("NO MATCHES POSSIBLE FOR THIS STATE!");
-        }
-
-        swaps.getSelectionModel().selectedItemProperty().addListener(
-                new ChangeListener<String>() {
-
-            @Override
-            public void changed(ObservableValue<? extends String> observable,
-                    String oldValue, String newValue) {
-                // Your action here
-                System.out.println("Selected item: " + newValue);
-                try {
-                    int index = Integer.parseInt(newValue.split(" ")[0]);
-                    Match3Game.MatchingPair pair = pairs.get(index);
-                    Cell[][] cells = asdf.GetNextState(pair);
-                    NewStateView(1, 0, cells, main_view);
-                } catch (NumberFormatException ex) {
-                    // do nothing.
-                }
-            }
-        });
-    }
-
-    ListView<String> NewStateView(int row, int col,
-            Cell[][] cells, GridPane mainView) {
-        Match3Game game = new Match3Game(cells);
-        game.RemoveMatches();
-        GridPane state_view = new GridPane();
-        StateViewController.refresh(game.mCells, state_view);
-
-        ListView<String> swaps = new ListView<>();
-        ObservableList<String> items = FXCollections.observableArrayList();
-        swaps.setItems(items);
-
-        mainView.getColumnConstraints().add(new ColumnConstraints(250));
-        mainView.getRowConstraints().add(new RowConstraints(250));
-
-        for (Node node : mainView.getChildren()) {
-            if (node instanceof GridPane
-                    && mainView.getColumnIndex(node) == col
-                    && mainView.getRowIndex(node) == row) {
-                mainView.getChildren().remove(node);
-                break;
-            }
-        }
-        mainView.add(state_view, col, row);
-        mainView.add(swaps, col + 1, row);
-
-        ArrayList<Match3Game.MatchingPair> pairs = game.GetMatchableCells();
-        int count = 0;
-        for (Match3Game.MatchingPair pair : pairs) {
-            Match3Game next = new Match3Game(game.GetNextState(pair));
-            String match = count++ + " match: " + pair.mLeft.get()
-                    + " and " + pair.mRight.get() + " | " + next.RemoveMatches();
-            items.add(match);
-            mThreadPool.submit(new FutureTask<>(() -> {
-                int num = next.GetMaxNumSuccessorMoves(0, 2);
-                int index = items.indexOf(match);
-                String s = items.get(index) + " + " + num;
-                Platform.runLater(() -> {
-                    items.set(index, s);
-                });
-                return s;
-            }));
-        }
-        if (pairs.isEmpty()) {
-            items.add("NO MATCHES POSSIBLE FOR THIS STATE!");
-        }
-
-        swaps.getSelectionModel().selectedItemProperty().addListener(
-                new ChangeListener<String>() {
-
-            @Override
-            public void changed(ObservableValue<? extends String> observable,
-                    String oldValue, String newValue) {
-                try {
-                    int index = Integer.parseInt(newValue.split(" ")[0]);
-                    Match3Game.MatchingPair pair = pairs.get(index);
-                    Cell[][] cells = game.GetNextState(pair);
-                    NewStateView(row + 1, col, cells, mainView);
-                } catch (NumberFormatException ex) {
-                    // do nothing.
-                }
-            }
-        });
-
-        return swaps;
     }
 
     /**
