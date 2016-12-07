@@ -66,13 +66,13 @@ public class jfxmain extends Application {
     @Override
     public void start(Stage primaryStage) {
         //http://stackoverflow.com/questions/14897194/stop-threads-before-close-my-javafx-program
-//        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-//            @Override
-//            public void handle(WindowEvent e) {
-//                Platform.exit();
-//                System.exit(0);
-//            }
-//        });
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent e) {
+                Platform.exit();
+                System.exit(0);
+            }
+        });
 
         FXMLLoader fxml_loader = new FXMLLoader(
                 getClass().getResource("/match3fx/StateView.fxml"));
