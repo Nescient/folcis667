@@ -68,7 +68,7 @@ public class MainViewController implements Initializable {
     private GridPane StatePane;
 
     @FXML
-    private AnchorPane InputPane;
+    private GridPane InputPane;
 
     private static final ExecutorService mThreadPool
             = Executors.newFixedThreadPool(5);

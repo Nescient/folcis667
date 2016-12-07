@@ -9,14 +9,15 @@
 <BorderPane fx:id="MainPane" prefHeight="800" prefWidth="650"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.su.folcis667.match3fx.MainViewController">
     <left>
-        <ScrollPane prefHeight="800" prefWidth="650">
+        <ScrollPane prefHeight="800" prefWidth="510">
             <GridPane fx:id="StatePane" hgap="10" vgap="10"   />
         </ScrollPane>
     </left>
     <right>
-        <AnchorPane fx:id="InputPane" prefWidth="300" >
-            <Label AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0"  text="Goal" />
-            <TextField AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0"  />
-        </AnchorPane>
+        <GridPane fx:id="InputPane" hgap="5" vgap="5" >
+            <Label GridPane.rowIndex="0" GridPane.columnIndex="0">Goal Score</Label>
+            <TextField GridPane.rowIndex="0" GridPane.columnIndex="1"  />
+            <Label GridPane.rowIndex="0" GridPane.columnIndex="2" >tiles</Label>
+        </GridPane>
     </right>
 </BorderPane>
