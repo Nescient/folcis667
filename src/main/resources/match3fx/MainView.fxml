@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2016, Samuel Savage All rights reserved.-->
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane id="MainPane" prefHeight="400.0" prefWidth="600.0"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.su.folcis667.match3fx.MainViewController">
+    <left>
+    <fx:include source="StateView.fxml" fx:id="StatePane" />
+    </left>
+    <!--<GridPane id="StatePane" BorderPane.alignment="BASELINE_LEFT" />--> 
+    <right>
+    <AnchorPane id="InputPane" BorderPane.alignment="BASELINE_RIGHT">
+        <Label AnchorPane.topAnchor="0" text="Goal" />
+        <TextField AnchorPane.topAnchor="0" />
+    </AnchorPane>
+    </right>
+</BorderPane>
