@@ -31,6 +31,7 @@ import com.su.folcis667.match3.Cell;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,8 +42,12 @@ import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -51,6 +56,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
@@ -76,30 +82,42 @@ public class MainViewController implements Initializable {
 
     @FXML
     private GridPane InputPane;
-    
+
     @FXML
     private TextField mGoalView;
     final SimpleIntegerProperty mGoalProperty = new SimpleIntegerProperty(10);
-    
+
     @FXML
     private TextField mMoveLimitView;
     final SimpleIntegerProperty mMoveLimitProperty = new SimpleIntegerProperty(3);
-    
+
     @FXML
     private TextField mCostView;
     SimpleDoubleProperty mCostProperty = new SimpleDoubleProperty(1.0);
-    
-    private static final ExecutorService mThreadPool
+
+    @FXML
+    private Label mTotalMovesView;
+    ReadOnlyStringWrapper mTotalMovesProperty = new ReadOnlyStringWrapper("0");
+
+    @FXML
+    private Label mTotalMatchedView;
+    ReadOnlyStringWrapper mTotalMatchedProperty = new ReadOnlyStringWrapper("0");
+
+    @FXML
+    private Label mTotalCostView;
+    ReadOnlyStringWrapper mTotalCostProperty = new ReadOnlyStringWrapper("0");
+
+    private static final ExecutorService THREAD_POOL
             = Executors.newFixedThreadPool(5);
-    
-    public static void Shutdown(){
-        mThreadPool.shutdown();
+
+    public static void Shutdown() {
+        THREAD_POOL.shutdown();
         try {
-            mThreadPool.awaitTermination(3, TimeUnit.SECONDS);
+            THREAD_POOL.awaitTermination(3, TimeUnit.SECONDS);
         } catch (InterruptedException ex) {
             Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        mThreadPool.shutdownNow();
+        THREAD_POOL.shutdownNow();
     }
 
     @Override
@@ -107,13 +125,16 @@ public class MainViewController implements Initializable {
         mGoalView.textProperty().bindBidirectional(mGoalProperty, new NumberStringConverter());
         mMoveLimitView.textProperty().bindBidirectional(mMoveLimitProperty, new NumberStringConverter());
         mCostView.textProperty().bindBidirectional(mCostProperty, new NumberStringConverter());
+        mTotalMovesView.textProperty().bind(mTotalMovesProperty);
+        mTotalMatchedView.textProperty().bind(mTotalMatchedProperty);
+        mTotalCostView.textProperty().bind(mTotalCostProperty);
         NewStateView(0, 0, new Match3Game(5, 5, 3));
     }
 
-//    public void RefreshCells(Cell[][] cells) {
-//        MainViewController.RefreshCells(cells, StatePane);
-//    }
-    ListView<String> NewStateView(int row, int col,            Match3Game game) {
+    ListView<String> NewStateView(int row, int col, Match3Game game) {
+        mTotalMovesProperty.set(Integer.toString(row));
+        mTotalCostProperty.set(Double.toString(row * mCostProperty.get()));
+
         game.RemoveMatches();
         GridPane state_view = new GridPane();
         MainViewController.RefreshCells(game.mCells, state_view);
@@ -125,16 +146,23 @@ public class MainViewController implements Initializable {
         this.StatePane.getColumnConstraints().add(new ColumnConstraints(250));
         this.StatePane.getRowConstraints().add(new RowConstraints(250));
 
-        for (Node node : this.StatePane.getChildren()) {
+//        for (Node node : this.StatePane.getChildren()) {
+        for (Iterator<Node> i = this.StatePane.getChildren().iterator(); i.hasNext();) {
+            Node node = i.next();
             if (node instanceof GridPane
-                    && this.StatePane.getColumnIndex(node) == col
-                    && this.StatePane.getRowIndex(node) == row) {
-                this.StatePane.getChildren().remove(node);
-                break;
+                    //                    && this.StatePane.getColumnIndex(node) >= col
+                    && this.StatePane.getRowIndex(node) >= row) {
+                i.remove();
+//                this.StatePane.getChildren().remove(node);
+//                break;
+            } else if (node instanceof ListView
+                    && this.StatePane.getRowIndex(node) >= row) {
+                i.remove();
+//                this.StatePane.getChildren().remove(node);
             }
         }
-        this.StatePane.add(state_view, col, row);
-        this.StatePane.add(swaps, col + 1, row);
+        this.StatePane.add(state_view, 0, row);
+        this.StatePane.add(swaps, 1, row);
 
         ArrayList<Match3Game.MatchingPair> pairs = game.GetMatchableCells();
         int count = 0;
@@ -143,7 +171,7 @@ public class MainViewController implements Initializable {
             String match = count++ + " match: " + pair.mLeft.get()
                     + " and " + pair.mRight.get() + " | " + next.RemoveMatches();
             items.add(match);
-            mThreadPool.submit(new FutureTask<>(() -> {
+            THREAD_POOL.submit(new FutureTask<>(() -> {
                 int num = next.GetMaxNumSuccessorMoves(0, 2);
                 int index = items.indexOf(match);
                 String s = items.get(index) + " + " + num;

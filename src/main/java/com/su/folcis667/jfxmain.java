@@ -84,7 +84,7 @@ public class jfxmain extends Application {
         }
         MainViewController controller = (MainViewController) fxml_loader.getController();
 
-        Scene scene = new Scene(view, 800, 600);
+        Scene scene = new Scene(view);
         primaryStage.setTitle("Match 3 Puzzle Solver");
         primaryStage.setScene(scene);
         primaryStage.show();

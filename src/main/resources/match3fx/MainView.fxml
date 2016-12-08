@@ -5,9 +5,11 @@
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
 
-<BorderPane fx:id="MainPane" prefHeight="800" prefWidth="650"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.su.folcis667.match3fx.MainViewController">
+<BorderPane fx:id="MainPane" prefHeight="800" prefWidth="600"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.su.folcis667.match3fx.MainViewController">
     <left>
         <ScrollPane prefHeight="800" prefWidth="510">
             <GridPane fx:id="StatePane" hgap="10" vgap="10"   />
@@ -16,43 +18,51 @@
     <right>
         <GridPane fx:id="InputPane" hgap="5" vgap="5" >
             <padding>
-                <javafx.geometry.Insets top="5" right="5" bottom="5" left="5"/>
+                <Insets top="5" right="5" bottom="5" left="5"/>
             </padding>
             <Label GridPane.rowIndex="0" GridPane.columnIndex="0">Goal Score</Label>
-            <TextField fx:id="mGoalView" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="25" />
+            <TextField fx:id="mGoalView" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="50" />
             <Label GridPane.rowIndex="0" GridPane.columnIndex="2" >tiles</Label>
             
             <Label GridPane.rowIndex="1" GridPane.columnIndex="0">Move Limit</Label>
-            <TextField fx:id="mMoveLimitView" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="25" />
+            <TextField fx:id="mMoveLimitView" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="50" />
             
             <Label GridPane.rowIndex="2" GridPane.columnIndex="0">Move Cost</Label>
-            <TextField fx:id="mCostView" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="25" />
+            <TextField fx:id="mCostView" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="50" />
             
             <Label GridPane.rowIndex="3" GridPane.columnIndex="0">Search Algorithm</Label>
             
             <fx:define>
                 <ToggleGroup fx:id="tglgrp"/>  
             </fx:define>
-            <RadioButton GridPane.rowIndex="3" GridPane.columnIndex="1" toggleGroup="$tglgrp" text="Manual" selected="true">
+            <RadioButton GridPane.rowIndex="3" GridPane.columnIndex="1" GridPane.columnSpan="2" toggleGroup="$tglgrp" selected="true">
                 <tooltip>
                     <Tooltip text="You must pick each state.  Total (maximized) matched tiles are shown."/>
                 </tooltip>
+                Manual
             </RadioButton>
-            <RadioButton GridPane.rowIndex="4" GridPane.columnIndex="1" toggleGroup="$tglgrp">
+            <RadioButton GridPane.rowIndex="4" GridPane.columnIndex="1" GridPane.columnSpan="2" toggleGroup="$tglgrp">
                 <tooltip>
                     <Tooltip text="Picks the next state based on how many tiles will be removed in that state."/>
                 </tooltip>
                 Depth One
-                <!--                <toggle
-                <ToggleGroup fx:id="tglgrp" />-->
             </RadioButton>
-            <RadioButton GridPane.rowIndex="5" GridPane.columnIndex="1" toggleGroup="$tglgrp" >Depth Two
+            <RadioButton GridPane.rowIndex="5" GridPane.columnIndex="1" GridPane.columnSpan="2" toggleGroup="$tglgrp" >
                 <tooltip>
                     <Tooltip text="Selection heuristic accounts for the next state plus a random second state."/>
                 </tooltip>
+                Depth Two
             </RadioButton>
             
+            <Label GridPane.rowIndex="6" GridPane.columnIndex="0">Total Moves:</Label>
+            <Label fx:id="mTotalMovesView" GridPane.rowIndex="6" GridPane.columnIndex="1">0</Label>
             
+            <Label GridPane.rowIndex="7" GridPane.columnIndex="0">Total Matched:</Label>
+            <Label fx:id="mTotalMatchedView" GridPane.rowIndex="7" GridPane.columnIndex="1">0</Label>
+            <Label GridPane.rowIndex="7" GridPane.columnIndex="2">tiles</Label>
+            
+            <Label GridPane.rowIndex="8" GridPane.columnIndex="0">Total Cost:</Label>
+            <Label fx:id="mTotalCostView" GridPane.rowIndex="8" GridPane.columnIndex="1">0</Label>
         </GridPane>
     </right>
 </BorderPane>
