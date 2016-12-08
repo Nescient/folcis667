@@ -15,9 +15,44 @@
     </left>
     <right>
         <GridPane fx:id="InputPane" hgap="5" vgap="5" >
+            <padding>
+                <javafx.geometry.Insets top="5" right="5" bottom="5" left="5"/>
+            </padding>
             <Label GridPane.rowIndex="0" GridPane.columnIndex="0">Goal Score</Label>
-            <TextField GridPane.rowIndex="0" GridPane.columnIndex="1"  />
+            <TextField fx:id="mGoalView" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="25" />
             <Label GridPane.rowIndex="0" GridPane.columnIndex="2" >tiles</Label>
+            
+            <Label GridPane.rowIndex="1" GridPane.columnIndex="0">Move Limit</Label>
+            <TextField fx:id="mMoveLimitView" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="25" />
+            
+            <Label GridPane.rowIndex="2" GridPane.columnIndex="0">Move Cost</Label>
+            <TextField fx:id="mCostView" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="25" />
+            
+            <Label GridPane.rowIndex="3" GridPane.columnIndex="0">Search Algorithm</Label>
+            
+            <fx:define>
+                <ToggleGroup fx:id="tglgrp"/>  
+            </fx:define>
+            <RadioButton GridPane.rowIndex="3" GridPane.columnIndex="1" toggleGroup="$tglgrp" text="Manual" selected="true">
+                <tooltip>
+                    <Tooltip text="You must pick each state.  Total (maximized) matched tiles are shown."/>
+                </tooltip>
+            </RadioButton>
+            <RadioButton GridPane.rowIndex="4" GridPane.columnIndex="1" toggleGroup="$tglgrp">
+                <tooltip>
+                    <Tooltip text="Picks the next state based on how many tiles will be removed in that state."/>
+                </tooltip>
+                Depth One
+                <!--                <toggle
+                <ToggleGroup fx:id="tglgrp" />-->
+            </RadioButton>
+            <RadioButton GridPane.rowIndex="5" GridPane.columnIndex="1" toggleGroup="$tglgrp" >Depth Two
+                <tooltip>
+                    <Tooltip text="Selection heuristic accounts for the next state plus a random second state."/>
+                </tooltip>
+            </RadioButton>
+            
+            
         </GridPane>
     </right>
 </BorderPane>
