@@ -128,10 +128,10 @@ public class MainViewController implements Initializable {
         mTotalMovesView.textProperty().bind(mTotalMovesProperty);
         mTotalMatchedView.textProperty().bind(mTotalMatchedProperty);
         mTotalCostView.textProperty().bind(mTotalCostProperty);
-        NewStateView(0, 0, new Match3Game(5, 5, 3));
+        NewStateView(0, new Match3Game(5, 5, 3));
     }
 
-    ListView<String> NewStateView(int row, int col, Match3Game game) {
+    ListView<String> NewStateView(int row, Match3Game game) {
         mTotalMovesProperty.set(Integer.toString(row));
         mTotalCostProperty.set(Double.toString(row * mCostProperty.get()));
 
@@ -146,19 +146,12 @@ public class MainViewController implements Initializable {
         this.StatePane.getColumnConstraints().add(new ColumnConstraints(250));
         this.StatePane.getRowConstraints().add(new RowConstraints(250));
 
-//        for (Node node : this.StatePane.getChildren()) {
         for (Iterator<Node> i = this.StatePane.getChildren().iterator(); i.hasNext();) {
             Node node = i.next();
-            if (node instanceof GridPane
-                    //                    && this.StatePane.getColumnIndex(node) >= col
-                    && this.StatePane.getRowIndex(node) >= row) {
+            if (GridPane.getRowIndex(node) >= row
+                    && (node instanceof GridPane
+                    || node instanceof ListView)) {
                 i.remove();
-//                this.StatePane.getChildren().remove(node);
-//                break;
-            } else if (node instanceof ListView
-                    && this.StatePane.getRowIndex(node) >= row) {
-                i.remove();
-//                this.StatePane.getChildren().remove(node);
             }
         }
         this.StatePane.add(state_view, 0, row);
@@ -196,7 +189,7 @@ public class MainViewController implements Initializable {
                     Match3Game.MatchingPair pair = pairs.get(index);
                     Cell[][] cells = game.GetNextState(pair);
                     Match3Game next_game = new Match3Game(cells);
-                    NewStateView(row + 1, col, next_game);
+                    NewStateView(row + 1, next_game);
                 } catch (NumberFormatException ex) {
                     // do nothing.
                 }
