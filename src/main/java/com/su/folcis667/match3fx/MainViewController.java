@@ -58,7 +58,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Toggle;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
@@ -107,6 +110,10 @@ public class MainViewController implements Initializable {
     private Label mTotalCostView;
     ReadOnlyStringWrapper mTotalCostProperty = new ReadOnlyStringWrapper("0");
 
+    @FXML
+    private ToggleGroup tglgrp;
+    int mSearchType = 0;
+
     private static final ExecutorService THREAD_POOL
             = Executors.newFixedThreadPool(5);
 
@@ -128,6 +135,21 @@ public class MainViewController implements Initializable {
         mTotalMovesView.textProperty().bind(mTotalMovesProperty);
         mTotalMatchedView.textProperty().bind(mTotalMatchedProperty);
         mTotalCostView.textProperty().bind(mTotalCostProperty);
+
+        tglgrp.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+            @Override
+            public void changed(ObservableValue<? extends Toggle> ov, Toggle t, Toggle t1) {
+                RadioButton button = (RadioButton) t1.getToggleGroup().getSelectedToggle();
+                if ("Manual".equals(button.getText())) {
+                    mSearchType = 0;
+                } else if ("Depth One".equals(button.getText())) {
+                    mSearchType = 1;
+                } else if ("Depth Two".equals(button.getText())) {
+                    mSearchType = 2;
+                }
+            }
+        });
+
         NewStateView(0, new Match3Game(5, 5, 3));
     }
 
