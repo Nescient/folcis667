@@ -35,9 +35,14 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -47,12 +52,14 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.shape.Rectangle;
+import javafx.util.converter.NumberStringConverter;
 
 /**
  * FXML Controller class
@@ -69,12 +76,37 @@ public class MainViewController implements Initializable {
 
     @FXML
     private GridPane InputPane;
-
+    
+    @FXML
+    private TextField mGoalView;
+    final SimpleIntegerProperty mGoalProperty = new SimpleIntegerProperty(10);
+    
+    @FXML
+    private TextField mMoveLimitView;
+    final SimpleIntegerProperty mMoveLimitProperty = new SimpleIntegerProperty(3);
+    
+    @FXML
+    private TextField mCostView;
+    SimpleDoubleProperty mCostProperty = new SimpleDoubleProperty(1.0);
+    
     private static final ExecutorService mThreadPool
             = Executors.newFixedThreadPool(5);
+    
+    public static void Shutdown(){
+        mThreadPool.shutdown();
+        try {
+            mThreadPool.awaitTermination(3, TimeUnit.SECONDS);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        mThreadPool.shutdownNow();
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        mGoalView.textProperty().bindBidirectional(mGoalProperty, new NumberStringConverter());
+        mMoveLimitView.textProperty().bindBidirectional(mMoveLimitProperty, new NumberStringConverter());
+        mCostView.textProperty().bindBidirectional(mCostProperty, new NumberStringConverter());
         NewStateView(0, 0, new Match3Game(5, 5, 3));
     }
 
