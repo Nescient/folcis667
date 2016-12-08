@@ -62,9 +62,6 @@ import javafx.stage.WindowEvent;
  */
 public class jfxmain extends Application {
 
-    private static final ExecutorService mThreadPool
-            = Executors.newFixedThreadPool(5);
-
     @Override
     public void start(Stage primaryStage) {
         //http://stackoverflow.com/questions/14897194/stop-threads-before-close-my-javafx-program
@@ -87,7 +84,7 @@ public class jfxmain extends Application {
         }
         MainViewController controller = (MainViewController) fxml_loader.getController();
 
-        Scene scene = new Scene(view, 800, 650);
+        Scene scene = new Scene(view, 800, 600);
         primaryStage.setTitle("Match 3 Puzzle Solver");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -98,14 +95,7 @@ public class jfxmain extends Application {
      */
     public static void main(String[] args) {
         launch(args);
-
-        mThreadPool.shutdown();
-        try {
-            mThreadPool.awaitTermination(5, TimeUnit.SECONDS);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(jfxmain.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        mThreadPool.shutdownNow();
+        MainViewController.Shutdown();
     }
 
 }
