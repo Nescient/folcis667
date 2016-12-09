@@ -120,6 +120,9 @@ public class MainViewController implements Initializable {
     private ToggleGroup tglgrp;
     ReadOnlyObjectProperty<Toggle> mSearchType = null;
 
+    @FXML
+    private Label mResultDisplay;
+
     private static final ExecutorService THREAD_POOL
             = Executors.newFixedThreadPool(5);
 
@@ -142,10 +145,12 @@ public class MainViewController implements Initializable {
         mTotalMatchedView.textProperty().bind(mTotalMatchedProperty);
         mTotalCostView.textProperty().bind(mTotalCostProperty);
         mSearchType = tglgrp.selectedToggleProperty();
-        NewStateView(0, new Match3Game(5, 5, 3));
+        NewStateView(0, new Match3Game(10, 10, 3),
+                new ArrayList<Integer>(), new ArrayList<>());
     }
 
-    ListView<String> NewStateView(int row, Match3Game game) {
+    ListView<String> NewStateView(int row, Match3Game game,
+            ArrayList<Integer> path, ArrayList<ArrayList<Integer>> badPaths) {
         mTotalMovesProperty.set(Integer.toString(row));
         mTotalCostProperty.set(Double.toString(row * mCostProperty.get()));
 
@@ -159,6 +164,19 @@ public class MainViewController implements Initializable {
             num_matches += m;
         }
         mTotalMatchedProperty.set(Integer.toString(num_matches));
+
+        if (Integer.parseInt(mTotalMatchedProperty.get()) >= mGoalProperty.get()) {
+            String msg = "!! GOAL ACHIEVED:\n";
+            for(Integer x : path){
+                msg += x.toString() + " -> ";
+            }
+            msg += "GOAL!!!";
+            final String java_is_dumb = msg;
+            Platform.runLater(() -> {
+                mResultDisplay.setText(java_is_dumb);
+            });
+            return null;
+        }
 
         GridPane state_view = new GridPane();
         MainViewController.RefreshCells(game.mCells, state_view);
@@ -221,10 +239,11 @@ public class MainViewController implements Initializable {
                 public void run() {
                     swaps.scrollTo(x);
                     swaps.getSelectionModel().select(x);
+                    path.add(x);
                     Match3Game.MatchingPair pair = pairs.get(x);
                     Cell[][] cells = game.GetNextState(pair);
                     Match3Game next_game = new Match3Game(cells);
-                    NewStateView(row + 1, next_game);
+                    NewStateView(row + 1, next_game, path, badPaths);
                 }
             });
         } else if ("Depth Two".equals(button.getText())) {
@@ -241,7 +260,7 @@ public class MainViewController implements Initializable {
                         Match3Game.MatchingPair pair = pairs.get(index);
                         Cell[][] cells = game.GetNextState(pair);
                         Match3Game next_game = new Match3Game(cells);
-                        NewStateView(row + 1, next_game);
+                        NewStateView(row + 1, next_game, path, badPaths);
                     } catch (NumberFormatException ex) {
                         // do nothing.
                     }

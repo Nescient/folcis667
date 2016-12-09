@@ -17,6 +17,11 @@
     </left>
     <right>
         <GridPane fx:id="InputPane" hgap="5" vgap="5" >
+            <columnConstraints>
+                <ColumnConstraints />
+                <ColumnConstraints hgrow="SOMETIMES" prefWidth="60" />
+            </columnConstraints>
+            
             <padding>
                 <Insets top="5" right="5" bottom="5" left="5"/>
             </padding>
@@ -47,22 +52,24 @@
                 </tooltip>
                 Depth One
             </RadioButton>
-            <RadioButton GridPane.rowIndex="5" GridPane.columnIndex="1" GridPane.columnSpan="2" toggleGroup="$tglgrp" >
+            <RadioButton GridPane.rowIndex="5" GridPane.columnIndex="1" GridPane.columnSpan="2" toggleGroup="$tglgrp">
                 <tooltip>
                     <Tooltip text="Selection heuristic accounts for the next state plus a random second state."/>
                 </tooltip>
                 Depth Two
             </RadioButton>
             
-            <Label GridPane.rowIndex="6" GridPane.columnIndex="0">Total Moves:</Label>
-            <Label fx:id="mTotalMovesView" GridPane.rowIndex="6" GridPane.columnIndex="1">0</Label>
+            <Label fx:id="mResultDisplay" GridPane.rowIndex="6" GridPane.columnIndex="0" GridPane.columnSpan="3"></Label>
             
-            <Label GridPane.rowIndex="7" GridPane.columnIndex="0">Total Matched:</Label>
-            <Label fx:id="mTotalMatchedView" GridPane.rowIndex="7" GridPane.columnIndex="1">0</Label>
-            <Label GridPane.rowIndex="7" GridPane.columnIndex="2">tiles</Label>
+            <Label GridPane.rowIndex="7" GridPane.columnIndex="0">Total Moves:</Label>
+            <Label fx:id="mTotalMovesView" GridPane.rowIndex="7" GridPane.columnIndex="1">0</Label>
             
-            <Label GridPane.rowIndex="8" GridPane.columnIndex="0">Total Cost:</Label>
-            <Label fx:id="mTotalCostView" GridPane.rowIndex="8" GridPane.columnIndex="1">0</Label>
+            <Label GridPane.rowIndex="8" GridPane.columnIndex="0">Total Matched:</Label>
+            <Label fx:id="mTotalMatchedView" GridPane.rowIndex="8" GridPane.columnIndex="1">0</Label>
+            <Label GridPane.rowIndex="8" GridPane.columnIndex="2">tiles</Label>
+            
+            <Label GridPane.rowIndex="9" GridPane.columnIndex="0">Total Cost:</Label>
+            <Label fx:id="mTotalCostView" GridPane.rowIndex="9" GridPane.columnIndex="1">0</Label>
         </GridPane>
     </right>
 </BorderPane>
