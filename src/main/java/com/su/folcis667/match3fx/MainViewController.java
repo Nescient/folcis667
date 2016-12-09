@@ -110,6 +110,7 @@ public class MainViewController implements Initializable {
     @FXML
     private Label mTotalMatchedView;
     ReadOnlyStringWrapper mTotalMatchedProperty = new ReadOnlyStringWrapper("0");
+    ArrayList<Integer> mMatchList = new ArrayList<>();
 
     @FXML
     private Label mTotalCostView;
@@ -117,9 +118,7 @@ public class MainViewController implements Initializable {
 
     @FXML
     private ToggleGroup tglgrp;
-//    int mSearchType = 0;
-//    ToggleGroupValue mSearchType = new ToggleGroupValue();
-    ReadOnlyObjectProperty<Toggle> mSearchType;
+    ReadOnlyObjectProperty<Toggle> mSearchType = null;
 
     private static final ExecutorService THREAD_POOL
             = Executors.newFixedThreadPool(5);
@@ -142,22 +141,7 @@ public class MainViewController implements Initializable {
         mTotalMovesView.textProperty().bind(mTotalMovesProperty);
         mTotalMatchedView.textProperty().bind(mTotalMatchedProperty);
         mTotalCostView.textProperty().bind(mTotalCostProperty);
-//        tglgrp.selectedToggleProperty().bind(mSearchType);
         mSearchType = tglgrp.selectedToggleProperty();
-
-//        tglgrp.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
-//            @Override
-//            public void changed(ObservableValue<? extends Toggle> ov, Toggle t, Toggle t1) {
-//                RadioButton button = (RadioButton) t1.getToggleGroup().getSelectedToggle();
-//                if ("Manual".equals(button.getText())) {
-//                    mSearchType = 0;
-//                } else if ("Depth One".equals(button.getText())) {
-//                    mSearchType = 1;
-//                } else if ("Depth Two".equals(button.getText())) {
-//                    mSearchType = 2;
-//                }
-//            }
-//        });
         NewStateView(0, new Match3Game(5, 5, 3));
     }
 
@@ -165,7 +149,17 @@ public class MainViewController implements Initializable {
         mTotalMovesProperty.set(Integer.toString(row));
         mTotalCostProperty.set(Double.toString(row * mCostProperty.get()));
 
-        game.RemoveMatches();
+        int num_matches = game.RemoveMatches();
+        if (mMatchList.size() > row) {
+            mMatchList.subList(row, mMatchList.size()).clear();
+        }
+        mMatchList.add(num_matches);
+        num_matches = 0;
+        for (Integer m : mMatchList) {
+            num_matches += m;
+        }
+        mTotalMatchedProperty.set(Integer.toString(num_matches));
+
         GridPane state_view = new GridPane();
         MainViewController.RefreshCells(game.mCells, state_view);
 
@@ -188,103 +182,72 @@ public class MainViewController implements Initializable {
         this.StatePane.add(swaps, 1, row);
 
         ArrayList<Match3Game.MatchingPair> pairs = game.GetMatchableCells();
-        String text = ((RadioButton) mSearchType.get()).getText();
         int count = 0;
         int best_match_index = 0;
         int best_match = 0;
         for (Match3Game.MatchingPair pair : pairs) {
             Match3Game next = new Match3Game(game.GetNextState(pair));
-            int num_matches = next.RemoveMatches();
+            int num_next_matches = next.RemoveMatches();
             String match = count++ + " match: " + pair.mLeft.get()
-                    + " and " + pair.mRight.get() + " | " + num_matches;
+                    + " and " + pair.mRight.get() + " | " + num_next_matches;
             items.add(match);
-            if (num_matches > best_match) {
-                best_match = num_matches;
-                best_match_index = count-1;
+            if (num_next_matches > best_match) {
+                best_match = num_next_matches;
+                best_match_index = count - 1;
             }
 
-            if ("Manual".equals(text)) {
+            if ("Manual".equals(((RadioButton) mSearchType.get()).getText())) {
                 THREAD_POOL.submit(new FutureTask<>(() -> {
-                    if ("Manual".equals(text)) {
-                        int num = next.GetMaxNumSuccessorMoves(0, 2);
-                        int index = items.indexOf(match);
-                        String s = items.get(index) + " + " + num;
-                        Platform.runLater(() -> {
+                    int num = next.GetMaxNumSuccessorMoves(0, 2);
+                    int index = items.indexOf(match);
+                    String s = items.get(index) + " + " + num;
+                    Platform.runLater(() -> {
+                        if ("Manual".equals(((RadioButton) mSearchType.get()).getText())) {
                             items.set(index, s);
-                        });
-                        return s;
-                    } else if ("Depth One".equals(text)) {
-                        // do the search
-                    } else if ("Depth Two".equals(text)) {
-                        // do the other search
-                    }
-                    return text;
+                        }
+                    });
+                    return s;
                 }));
             }
         }
+        RadioButton button = (RadioButton) mSearchType.get();
         if (pairs.isEmpty()) {
             items.add("NO MATCHES POSSIBLE FOR THIS STATE!");
-        }
-
-        swaps.getSelectionModel().selectedItemProperty().addListener(
-                new ChangeListener<String>() {
-
-            @Override
-            public void changed(ObservableValue<? extends String> observable,
-                    String oldValue, String newValue) {
-                try {
-                    int index = Integer.parseInt(newValue.split(" ")[0]);
-                    Match3Game.MatchingPair pair = pairs.get(index);
-                    Cell[][] cells = game.GetNextState(pair);
-                    Match3Game next_game = new Match3Game(cells);
-                    NewStateView(row + 1, next_game);
-                } catch (NumberFormatException ex) {
-                    // do nothing.
-                }
-            }
-        });
-
-        if ("Depth One".equals(text) && !pairs.isEmpty()) {
+        } else if ("Depth One".equals(button.getText())) {
             final int x = best_match_index;
-            
-            Timeline timeline = new Timeline(new KeyFrame(
-                    Duration.millis(500),
-                    ae -> {
-                        swaps.getSelectionModel().select(x);
-                        Match3Game.MatchingPair pair = pairs.get(x);
+            Platform.runLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    swaps.scrollTo(x);
+                    swaps.getSelectionModel().select(x);
+                    Match3Game.MatchingPair pair = pairs.get(x);
                     Cell[][] cells = game.GetNextState(pair);
                     Match3Game next_game = new Match3Game(cells);
                     NewStateView(row + 1, next_game);
-//                        swaps.getSelectionModel().selectedItemProperty().
-                    }));
-            timeline.play();
-            
-//            Platform.runLater(new Runnable() {
-//
-//                @Override
-//                public void run() {
-//                    swaps.scrollTo(x);
-//                    swaps.getSelectionModel().select(x);
-//                }
-//            });
-
-//            final ListView<String> x = swaps;
-//            Platform.runLater(() -> {
-//THREAD_POOL.submit(new FutureTask<>(() -> {
-//FxTimer.
-//            Timeline timeline = new Timeline(new KeyFrame(
-//                    Duration.millis(2500),
-//                    ae -> {
-//                        x.getSelectionModel().select(best_match_index);
-//                    }));
-//            timeline.play();
-//                swaps.getSelectionModel().select(best_match_index);
-//                return best_match_index;
-//            });
-        } else if ("Depth Two".equals(text) && !pairs.isEmpty()) {
+                }
+            });
+        } else if ("Depth Two".equals(button.getText())) {
             // do the other search
-        }
+        } else {
+            swaps.getSelectionModel().selectedItemProperty().addListener(
+                    new ChangeListener<String>() {
 
+                @Override
+                public void changed(ObservableValue<? extends String> observable,
+                        String oldValue, String newValue) {
+                    try {
+                        int index = Integer.parseInt(newValue.split(" ")[0]);
+                        Match3Game.MatchingPair pair = pairs.get(index);
+                        Cell[][] cells = game.GetNextState(pair);
+                        Match3Game next_game = new Match3Game(cells);
+                        NewStateView(row + 1, next_game);
+                    } catch (NumberFormatException ex) {
+                        // do nothing.
+                    }
+                }
+            });
+        }
         return swaps;
     }
 
