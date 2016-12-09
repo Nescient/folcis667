@@ -26,39 +26,32 @@
 package com.su.folcis667.match3fx;
 
 import com.su.folcis667.Match3Game;
-import com.su.folcis667.jfxmain;
 import com.su.folcis667.match3.Cell;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -67,15 +60,11 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.shape.Rectangle;
-import javafx.util.Duration;
 import javafx.util.converter.NumberStringConverter;
-import jfxtras.scene.control.ToggleGroupValue;
 
 /**
  * FXML Controller class
@@ -140,9 +129,12 @@ public class MainViewController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        mGoalView.textProperty().bindBidirectional(mGoalProperty, new NumberStringConverter());
-        mMoveLimitView.textProperty().bindBidirectional(mMoveLimitProperty, new NumberStringConverter());
-        mCostView.textProperty().bindBidirectional(mCostProperty, new NumberStringConverter());
+        mGoalView.textProperty().bindBidirectional(mGoalProperty,
+                new NumberStringConverter());
+        mMoveLimitView.textProperty().bindBidirectional(mMoveLimitProperty,
+                new NumberStringConverter());
+        mCostView.textProperty().bindBidirectional(mCostProperty,
+                new NumberStringConverter());
         mTotalMovesView.textProperty().bind(mTotalMovesProperty);
         mTotalMatchedView.textProperty().bind(mTotalMatchedProperty);
         mTotalCostView.textProperty().bind(mTotalCostProperty);
@@ -153,6 +145,9 @@ public class MainViewController implements Initializable {
 
     void Restart(ArrayList<ArrayList<Integer>> badPaths) {
         Shutdown();
+         Platform.runLater(() -> {
+                mResultDisplay.setText("");
+            });
         mThreatPool = Executors.newFixedThreadPool(3);
         NewStateView(0, new Match3Game(10, 10, 3),
                 new ArrayList<Integer>(), badPaths);
@@ -202,7 +197,7 @@ public class MainViewController implements Initializable {
             msg += "GOAL!!!";
             final String java_is_dumb = msg;
             Platform.runLater(() -> {
-                mResultDisplay.setText(mResultDisplay.getText()+java_is_dumb);
+                mResultDisplay.setText(mResultDisplay.getText() + java_is_dumb);
             });
             return null;
         }
@@ -214,10 +209,8 @@ public class MainViewController implements Initializable {
         ObservableList<String> items = FXCollections.observableArrayList();
         swaps.setItems(items);
 
-//        this.StatePane.getColumnConstraints().add(new ColumnConstraints(250));
-        this.StatePane.getRowConstraints().add(new RowConstraints(250));
-
-        for (Iterator<Node> i = this.StatePane.getChildren().iterator(); i.hasNext();) {
+        for (Iterator<Node> i = this.StatePane.getChildren().iterator();
+                i.hasNext();) {
             Node node = i.next();
             if (GridPane.getRowIndex(node) >= row
                     && (node instanceof GridPane
@@ -225,10 +218,12 @@ public class MainViewController implements Initializable {
                 i.remove();
             }
         }
+        this.StatePane.getRowConstraints().add(new RowConstraints(250));
         this.StatePane.add(state_view, 0, row);
         this.StatePane.add(swaps, 1, row);
 
         ArrayList<Match3Game.MatchingPair> pairs = game.GetMatchableCells();
+        Hashtable<Integer, Integer> random_matches = new Hashtable<>();
         int count = 0;
         int best_match_index = -1;
         int best_match = -1;
@@ -255,6 +250,19 @@ public class MainViewController implements Initializable {
                     });
                     return s;
                 }));
+            } else if ("Depth Two".equals(((RadioButton) mSearchType.get()).getText())) {
+                mThreatPool.submit(new FutureTask<>(() -> {
+                    int num = next.GetRandomSuccessorMoves(0, 0);
+                    int index = items.indexOf(match);
+                    random_matches.put(index, num_next_matches + num);
+                    String s = items.get(index) + " + " + num;
+                    Platform.runLater(() -> {
+                        if ("Depth Two".equals(((RadioButton) mSearchType.get()).getText())) {
+                            items.set(index, s);
+                        }
+                    });
+                    return s;
+                }));
             }
         }
         RadioButton button = (RadioButton) mSearchType.get();
@@ -276,7 +284,40 @@ public class MainViewController implements Initializable {
                 }
             });
         } else if ("Depth Two".equals(button.getText())) {
-            // do the other search
+//            Thread thread = new Thread(task);
+
+            mThreatPool.submit(new FutureTask<>(() -> {
+
+                while (random_matches.size() < pairs.size()) {
+                    Thread.sleep(1000);
+                }
+                int best_match_index2 = -1;
+                int best_match2 = -1;
+                Set<Integer> keys = random_matches.keySet();
+                for (Integer k : keys) {
+                    if (random_matches.get(k) > best_match2) {
+                        best_match2 = random_matches.get(k);
+                        best_match_index2 = k;
+                    }
+                }
+                final int x = best_match_index2;
+                Platform.runLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        swaps.scrollTo(x);
+                        swaps.getSelectionModel().select(x);
+                        path.add(x);
+                        Match3Game.MatchingPair pair = pairs.get(x);
+                        Cell[][] cells = game.GetNextState(pair);
+                        Match3Game next_game = new Match3Game(cells);
+                        NewStateView(row + 1, next_game, path, badPaths);
+                    }
+                });
+                return x;
+            }));
+            
+//            thread.start();
         } else {
             swaps.getSelectionModel().selectedItemProperty().addListener(
                     new ChangeListener<String>() {
