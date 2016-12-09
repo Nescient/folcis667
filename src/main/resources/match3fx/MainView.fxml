@@ -11,8 +11,13 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.su.folcis667.match3fx.MainViewController">
     <left>
-        <ScrollPane prefHeight="800" prefWidth="510">
-            <GridPane fx:id="StatePane" hgap="10" vgap="10"   />
+        <ScrollPane prefHeight="800" prefWidth="520">
+            <GridPane fx:id="StatePane" hgap="10" vgap="10">
+                 <columnConstraints>
+                <ColumnConstraints prefWidth="250" />
+                <ColumnConstraints prefWidth="250" />
+            </columnConstraints>
+            </GridPane>
         </ScrollPane>
     </left>
     <right>
@@ -70,6 +75,8 @@
             
             <Label GridPane.rowIndex="9" GridPane.columnIndex="0">Total Cost:</Label>
             <Label fx:id="mTotalCostView" GridPane.rowIndex="9" GridPane.columnIndex="1">0</Label>
+            
+            <Button GridPane.rowIndex="11" GridPane.columnIndex="1" GridPane.columnSpan="2" onAction="#HandleRestart" >Restart</Button>
         </GridPane>
     </right>
 </BorderPane>

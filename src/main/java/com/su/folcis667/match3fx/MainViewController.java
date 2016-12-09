@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -55,6 +56,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -123,17 +125,17 @@ public class MainViewController implements Initializable {
     @FXML
     private Label mResultDisplay;
 
-    private static final ExecutorService THREAD_POOL
-            = Executors.newFixedThreadPool(5);
+    private static ExecutorService mThreatPool
+            = Executors.newFixedThreadPool(3);
 
     public static void Shutdown() {
-        THREAD_POOL.shutdown();
+        mThreatPool.shutdown();
         try {
-            THREAD_POOL.awaitTermination(3, TimeUnit.SECONDS);
+            mThreatPool.awaitTermination(3, TimeUnit.SECONDS);
         } catch (InterruptedException ex) {
             Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        THREAD_POOL.shutdownNow();
+        mThreatPool.shutdownNow();
     }
 
     @Override
@@ -147,6 +149,18 @@ public class MainViewController implements Initializable {
         mSearchType = tglgrp.selectedToggleProperty();
         NewStateView(0, new Match3Game(10, 10, 3),
                 new ArrayList<Integer>(), new ArrayList<>());
+    }
+
+    void Restart(ArrayList<ArrayList<Integer>> badPaths) {
+        Shutdown();
+        mThreatPool = Executors.newFixedThreadPool(3);
+        NewStateView(0, new Match3Game(10, 10, 3),
+                new ArrayList<Integer>(), badPaths);
+    }
+
+    @FXML
+    protected void HandleRestart(ActionEvent event) {
+        Restart(new ArrayList<>());
     }
 
     ListView<String> NewStateView(int row, Match3Game game,
@@ -164,16 +178,31 @@ public class MainViewController implements Initializable {
             num_matches += m;
         }
         mTotalMatchedProperty.set(Integer.toString(num_matches));
+        if ((!"Manual".equals(((RadioButton) mSearchType.get()).getText()))
+                && (row * mCostProperty.get() >= mMoveLimitProperty.get())) {
+            String msg = "Limit Reached: \n";
+            for (Integer x : path) {
+                msg += x.toString() + " -> ";
+            }
+            msg += "FAILED\n";
+            final String java_is_dumb = msg;
+            Platform.runLater(() -> {
+                mResultDisplay.setText(mResultDisplay.getText() + java_is_dumb);
+            });
+            badPaths.add(path);
+            Restart(badPaths);
+            return null;
+        }
 
         if (Integer.parseInt(mTotalMatchedProperty.get()) >= mGoalProperty.get()) {
             String msg = "!! GOAL ACHIEVED:\n";
-            for(Integer x : path){
+            for (Integer x : path) {
                 msg += x.toString() + " -> ";
             }
             msg += "GOAL!!!";
             final String java_is_dumb = msg;
             Platform.runLater(() -> {
-                mResultDisplay.setText(java_is_dumb);
+                mResultDisplay.setText(mResultDisplay.getText()+java_is_dumb);
             });
             return null;
         }
@@ -185,7 +214,7 @@ public class MainViewController implements Initializable {
         ObservableList<String> items = FXCollections.observableArrayList();
         swaps.setItems(items);
 
-        this.StatePane.getColumnConstraints().add(new ColumnConstraints(250));
+//        this.StatePane.getColumnConstraints().add(new ColumnConstraints(250));
         this.StatePane.getRowConstraints().add(new RowConstraints(250));
 
         for (Iterator<Node> i = this.StatePane.getChildren().iterator(); i.hasNext();) {
@@ -201,22 +230,22 @@ public class MainViewController implements Initializable {
 
         ArrayList<Match3Game.MatchingPair> pairs = game.GetMatchableCells();
         int count = 0;
-        int best_match_index = 0;
-        int best_match = 0;
+        int best_match_index = -1;
+        int best_match = -1;
         for (Match3Game.MatchingPair pair : pairs) {
             Match3Game next = new Match3Game(game.GetNextState(pair));
             int num_next_matches = next.RemoveMatches();
             String match = count++ + " match: " + pair.mLeft.get()
                     + " and " + pair.mRight.get() + " | " + num_next_matches;
             items.add(match);
-            if (num_next_matches > best_match) {
+            if (num_next_matches > best_match && !IsBadChoice(count - 1, path, badPaths)) {
                 best_match = num_next_matches;
                 best_match_index = count - 1;
             }
 
             if ("Manual".equals(((RadioButton) mSearchType.get()).getText())) {
-                THREAD_POOL.submit(new FutureTask<>(() -> {
-                    int num = next.GetMaxNumSuccessorMoves(0, 2);
+                mThreatPool.submit(new FutureTask<>(() -> {
+                    int num = next.GetMaxNumSuccessorMoves(0, 0);
                     int index = items.indexOf(match);
                     String s = items.get(index) + " + " + num;
                     Platform.runLater(() -> {
@@ -229,7 +258,7 @@ public class MainViewController implements Initializable {
             }
         }
         RadioButton button = (RadioButton) mSearchType.get();
-        if (pairs.isEmpty()) {
+        if (pairs.isEmpty() || best_match == -1) {
             items.add("NO MATCHES POSSIBLE FOR THIS STATE!");
         } else if ("Depth One".equals(button.getText())) {
             final int x = best_match_index;
@@ -268,6 +297,25 @@ public class MainViewController implements Initializable {
             });
         }
         return swaps;
+    }
+
+    boolean IsBadChoice(int next, ArrayList<Integer> path, ArrayList<ArrayList<Integer>> badPaths) {
+        for (ArrayList<Integer> p : badPaths) {
+            if (PathMatch(p, path) && p.size() > path.size()
+                    && p.get(path.size()) == next) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean PathMatch(ArrayList<Integer> p1, ArrayList<Integer> p2) {
+        for (int i = 0; i < p1.size() && i < p2.size(); ++i) {
+            if (!Objects.equals(p1.get(i), p2.get(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static void RefreshCells(Cell[][] cells, GridPane view) {
