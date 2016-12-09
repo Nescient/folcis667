@@ -68,6 +68,7 @@ public class jfxmain extends Application {
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent e) {
+                MainViewController.Shutdown();
                 Platform.exit();
                 System.exit(0);
             }
