@@ -39,9 +39,12 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -68,7 +71,9 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 import javafx.util.converter.NumberStringConverter;
+import jfxtras.scene.control.ToggleGroupValue;
 
 /**
  * FXML Controller class
@@ -112,7 +117,9 @@ public class MainViewController implements Initializable {
 
     @FXML
     private ToggleGroup tglgrp;
-    int mSearchType = 0;
+//    int mSearchType = 0;
+//    ToggleGroupValue mSearchType = new ToggleGroupValue();
+    ReadOnlyObjectProperty<Toggle> mSearchType;
 
     private static final ExecutorService THREAD_POOL
             = Executors.newFixedThreadPool(5);
@@ -135,21 +142,22 @@ public class MainViewController implements Initializable {
         mTotalMovesView.textProperty().bind(mTotalMovesProperty);
         mTotalMatchedView.textProperty().bind(mTotalMatchedProperty);
         mTotalCostView.textProperty().bind(mTotalCostProperty);
+//        tglgrp.selectedToggleProperty().bind(mSearchType);
+        mSearchType = tglgrp.selectedToggleProperty();
 
-        tglgrp.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
-            @Override
-            public void changed(ObservableValue<? extends Toggle> ov, Toggle t, Toggle t1) {
-                RadioButton button = (RadioButton) t1.getToggleGroup().getSelectedToggle();
-                if ("Manual".equals(button.getText())) {
-                    mSearchType = 0;
-                } else if ("Depth One".equals(button.getText())) {
-                    mSearchType = 1;
-                } else if ("Depth Two".equals(button.getText())) {
-                    mSearchType = 2;
-                }
-            }
-        });
-
+//        tglgrp.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+//            @Override
+//            public void changed(ObservableValue<? extends Toggle> ov, Toggle t, Toggle t1) {
+//                RadioButton button = (RadioButton) t1.getToggleGroup().getSelectedToggle();
+//                if ("Manual".equals(button.getText())) {
+//                    mSearchType = 0;
+//                } else if ("Depth One".equals(button.getText())) {
+//                    mSearchType = 1;
+//                } else if ("Depth Two".equals(button.getText())) {
+//                    mSearchType = 2;
+//                }
+//            }
+//        });
         NewStateView(0, new Match3Game(5, 5, 3));
     }
 
@@ -180,21 +188,39 @@ public class MainViewController implements Initializable {
         this.StatePane.add(swaps, 1, row);
 
         ArrayList<Match3Game.MatchingPair> pairs = game.GetMatchableCells();
+        String text = ((RadioButton) mSearchType.get()).getText();
         int count = 0;
+        int best_match_index = 0;
+        int best_match = 0;
         for (Match3Game.MatchingPair pair : pairs) {
             Match3Game next = new Match3Game(game.GetNextState(pair));
+            int num_matches = next.RemoveMatches();
             String match = count++ + " match: " + pair.mLeft.get()
-                    + " and " + pair.mRight.get() + " | " + next.RemoveMatches();
+                    + " and " + pair.mRight.get() + " | " + num_matches;
             items.add(match);
-            THREAD_POOL.submit(new FutureTask<>(() -> {
-                int num = next.GetMaxNumSuccessorMoves(0, 2);
-                int index = items.indexOf(match);
-                String s = items.get(index) + " + " + num;
-                Platform.runLater(() -> {
-                    items.set(index, s);
-                });
-                return s;
-            }));
+            if (num_matches > best_match) {
+                best_match = num_matches;
+                best_match_index = count-1;
+            }
+
+            if ("Manual".equals(text)) {
+                THREAD_POOL.submit(new FutureTask<>(() -> {
+                    if ("Manual".equals(text)) {
+                        int num = next.GetMaxNumSuccessorMoves(0, 2);
+                        int index = items.indexOf(match);
+                        String s = items.get(index) + " + " + num;
+                        Platform.runLater(() -> {
+                            items.set(index, s);
+                        });
+                        return s;
+                    } else if ("Depth One".equals(text)) {
+                        // do the search
+                    } else if ("Depth Two".equals(text)) {
+                        // do the other search
+                    }
+                    return text;
+                }));
+            }
         }
         if (pairs.isEmpty()) {
             items.add("NO MATCHES POSSIBLE FOR THIS STATE!");
@@ -217,6 +243,47 @@ public class MainViewController implements Initializable {
                 }
             }
         });
+
+        if ("Depth One".equals(text) && !pairs.isEmpty()) {
+            final int x = best_match_index;
+            
+            Timeline timeline = new Timeline(new KeyFrame(
+                    Duration.millis(500),
+                    ae -> {
+                        swaps.getSelectionModel().select(x);
+                        Match3Game.MatchingPair pair = pairs.get(x);
+                    Cell[][] cells = game.GetNextState(pair);
+                    Match3Game next_game = new Match3Game(cells);
+                    NewStateView(row + 1, next_game);
+//                        swaps.getSelectionModel().selectedItemProperty().
+                    }));
+            timeline.play();
+            
+//            Platform.runLater(new Runnable() {
+//
+//                @Override
+//                public void run() {
+//                    swaps.scrollTo(x);
+//                    swaps.getSelectionModel().select(x);
+//                }
+//            });
+
+//            final ListView<String> x = swaps;
+//            Platform.runLater(() -> {
+//THREAD_POOL.submit(new FutureTask<>(() -> {
+//FxTimer.
+//            Timeline timeline = new Timeline(new KeyFrame(
+//                    Duration.millis(2500),
+//                    ae -> {
+//                        x.getSelectionModel().select(best_match_index);
+//                    }));
+//            timeline.play();
+//                swaps.getSelectionModel().select(best_match_index);
+//                return best_match_index;
+//            });
+        } else if ("Depth Two".equals(text) && !pairs.isEmpty()) {
+            // do the other search
+        }
 
         return swaps;
     }
