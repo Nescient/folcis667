@@ -30,13 +30,7 @@ import com.su.folcis667.match3.Matched;
 import com.su.folcis667.match3.NeighborX;
 import com.su.folcis667.match3.NeighborY;
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Random;
 
 public class Match3Game {
 
@@ -277,5 +271,17 @@ public class Match3Game {
             }
         }
         return num_moves;
+    }
+
+    public int GetRandomSuccessorMoves(int depth, int maxDepth) {
+        if (depth > maxDepth) {
+            return 0;
+        }
+        ArrayList<MatchingPair> pairs = this.GetMatchableCells();
+        Random generator = new Random();
+        int index = generator.nextInt(pairs.size());
+        Match3Game next = new Match3Game(this.GetNextState(pairs.get(index)));
+        return next.RemoveMatches()
+                + next.GetRandomSuccessorMoves(depth + 1, maxDepth);
     }
 }
