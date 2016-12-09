@@ -145,9 +145,6 @@ public class MainViewController implements Initializable {
 
     void Restart(ArrayList<ArrayList<Integer>> badPaths) {
         Shutdown();
-         Platform.runLater(() -> {
-                mResultDisplay.setText("");
-            });
         mThreatPool = Executors.newFixedThreadPool(3);
         NewStateView(0, new Match3Game(10, 10, 3),
                 new ArrayList<Integer>(), badPaths);
@@ -155,6 +152,9 @@ public class MainViewController implements Initializable {
 
     @FXML
     protected void HandleRestart(ActionEvent event) {
+        Platform.runLater(() -> {
+            mResultDisplay.setText("");
+        });
         Restart(new ArrayList<>());
     }
 
@@ -251,15 +251,15 @@ public class MainViewController implements Initializable {
                     return s;
                 }));
             } else if ("Depth Two".equals(((RadioButton) mSearchType.get()).getText())) {
+                int index = count - 1;
                 mThreatPool.submit(new FutureTask<>(() -> {
-                    int num = next.GetRandomSuccessorMoves(0, 0);
-                    int index = items.indexOf(match);
+                    int num = IsBadChoice(index, path, badPaths)
+                            ? (int) (-3.0 * mCostProperty.get())
+                            : next.GetRandomSuccessorMoves(0, 0);
                     random_matches.put(index, num_next_matches + num);
                     String s = items.get(index) + " + " + num;
                     Platform.runLater(() -> {
-                        if ("Depth Two".equals(((RadioButton) mSearchType.get()).getText())) {
-                            items.set(index, s);
-                        }
+                        items.set(index, s);
                     });
                     return s;
                 }));
@@ -284,10 +284,7 @@ public class MainViewController implements Initializable {
                 }
             });
         } else if ("Depth Two".equals(button.getText())) {
-//            Thread thread = new Thread(task);
-
-            mThreatPool.submit(new FutureTask<>(() -> {
-
+            Thread thread = new Thread(new FutureTask<>(() -> {
                 while (random_matches.size() < pairs.size()) {
                     Thread.sleep(1000);
                 }
@@ -316,8 +313,7 @@ public class MainViewController implements Initializable {
                 });
                 return x;
             }));
-            
-//            thread.start();
+            thread.start();
         } else {
             swaps.getSelectionModel().selectedItemProperty().addListener(
                     new ChangeListener<String>() {
