@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
@@ -84,15 +85,15 @@ public class MainViewController implements Initializable {
 
     @FXML
     private TextField mGoalView;
-    final SimpleIntegerProperty mGoalProperty = new SimpleIntegerProperty(10);
+    final SimpleIntegerProperty mGoalProperty = new SimpleIntegerProperty(50);
 
     @FXML
     private TextField mMoveLimitView;
-    final SimpleIntegerProperty mMoveLimitProperty = new SimpleIntegerProperty(3);
+    final SimpleIntegerProperty mMoveLimitProperty = new SimpleIntegerProperty(15);
 
     @FXML
     private TextField mCostView;
-    SimpleDoubleProperty mCostProperty = new SimpleDoubleProperty(1.0);
+    SimpleDoubleProperty mCostProperty = new SimpleDoubleProperty(5.0);
 
     @FXML
     private Label mTotalMovesView;
@@ -209,13 +210,15 @@ public class MainViewController implements Initializable {
         ObservableList<String> items = FXCollections.observableArrayList();
         swaps.setItems(items);
 
-        for (Iterator<Node> i = this.StatePane.getChildren().iterator();
-                i.hasNext();) {
-            Node node = i.next();
-            if (GridPane.getRowIndex(node) >= row
-                    && (node instanceof GridPane
-                    || node instanceof ListView)) {
-                i.remove();
+        if (row < this.StatePane.getChildren().size()) {
+            for (Iterator<Node> i = this.StatePane.getChildren().iterator();
+                    i.hasNext();) {
+                Node node = i.next();
+                if (GridPane.getRowIndex(node) >= row
+                        && (node instanceof GridPane
+                        || node instanceof ListView)) {
+                    i.remove();
+                }
             }
         }
         this.StatePane.getRowConstraints().add(new RowConstraints(250));
@@ -224,6 +227,7 @@ public class MainViewController implements Initializable {
 
         ArrayList<Match3Game.MatchingPair> pairs = game.GetMatchableCells();
         Hashtable<Integer, Integer> random_matches = new Hashtable<>();
+        CountDownLatch latch = new CountDownLatch(pairs.size());
         int count = 0;
         int best_match_index = -1;
         int best_match = -1;
@@ -256,11 +260,12 @@ public class MainViewController implements Initializable {
                     int num = IsBadChoice(index, path, badPaths)
                             ? (int) (-3.0 * mCostProperty.get())
                             : next.GetRandomSuccessorMoves(0, 0);
-                    random_matches.put(index, num_next_matches + num);
+                    random_matches.put(index, num > 0 ? num_next_matches + num : num);
                     String s = items.get(index) + " + " + num;
                     Platform.runLater(() -> {
                         items.set(index, s);
                     });
+                    latch.countDown();
                     return s;
                 }));
             }
@@ -284,9 +289,10 @@ public class MainViewController implements Initializable {
                 }
             });
         } else if ("Depth Two".equals(button.getText())) {
-            Thread thread = new Thread(new FutureTask<>(() -> {
-                while (random_matches.size() < pairs.size()) {
-                    Thread.sleep(1000);
+            mThreatPool.submit(new FutureTask<>(() -> {
+                if (random_matches.size() < pairs.size()) {
+//                    Thread.sleep(1000);
+                    latch.await();
                 }
                 int best_match_index2 = -1;
                 int best_match2 = -1;
@@ -313,7 +319,6 @@ public class MainViewController implements Initializable {
                 });
                 return x;
             }));
-            thread.start();
         } else {
             swaps.getSelectionModel().selectedItemProperty().addListener(
                     new ChangeListener<String>() {
