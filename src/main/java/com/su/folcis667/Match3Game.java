@@ -278,10 +278,13 @@ public class Match3Game {
             return 0;
         }
         ArrayList<MatchingPair> pairs = this.GetMatchableCells();
-        Random generator = new Random();
-        int index = generator.nextInt(pairs.size());
-        Match3Game next = new Match3Game(this.GetNextState(pairs.get(index)));
-        return next.RemoveMatches()
-                + next.GetRandomSuccessorMoves(depth + 1, maxDepth);
+        if (pairs.size() > 0) {
+            Random generator = new Random();
+            int index = generator.nextInt(pairs.size());
+            Match3Game next = new Match3Game(this.GetNextState(pairs.get(index)));
+            return next.RemoveMatches()
+                    + next.GetRandomSuccessorMoves(depth + 1, maxDepth);
+        }
+        return 0;
     }
 }
